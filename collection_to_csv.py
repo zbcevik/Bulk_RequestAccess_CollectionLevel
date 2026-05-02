@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+"""Fetch dataset metadata from a Dataverse collection and export file-level rows to CSV."""
+
+import argparse
+import csv
+import json
+from pathlib import Path
+
+try:
+    from pyDataverse.api import NativeApi, SearchApi
+except ImportError as exc:
+    raise SystemExit(
+        "pyDataverse is required. Install it with `python3 -m pip install pyDataverse`."
+    ) from exc
+
+
+def normalize_server_url(server_url):
+    server_url = server_url.strip()
+    if server_url.endswith("/"):
+        server_url = server_url[:-1]
+    return server_url
+
+
+def create_dataverse_apis(server_url, api_key=None):
+    search_api = SearchApi(server_url, api_token=api_key)
+    native_api = NativeApi(server_url, api_token=api_key)
+    return search_api, native_api
+
+
+def search_collection_datasets(native_api, collection_alias):
+    # Use the /contents endpoint to list datasets in the dataverse
+    url = f"{native_api.base_url_api_native}/dataverses/{collection_alias}/contents"
+    response = native_api.get_request(url)
+    data = response.json() if hasattr(response, "json") else response
+    print(f"DEBUG: Contents response status: {response.status_code if hasattr(response, 'status_code') else 'N/A'}")
+    print(f"DEBUG: Contents data type: {type(data)}")
+    if isinstance(data, dict) and 'data' in data:
+        contents = data['data']
+    else:
+        contents = data
+    print(f"DEBUG: Contents: {contents[:3] if isinstance(contents, list) else contents}")  # Show first 3 items
+    # Filter for datasets
+    datasets = [item for item in contents if isinstance(item, dict) and item.get('type') == 'dataset']
+    print(f"DEBUG: Found {len(datasets)} datasets")
+    return datasets
+
+
+def extract_title(version):
+    citation = version.get("metadataBlocks", {}).get("citation", {})
+    for field in citation.get("fields", []):
+        if field.get("typeName") == "title":
+            return field.get("value")
+    return None
+
+
+def extract_dataset_rows(dataset_data, source_identifier=""):
+    if not isinstance(dataset_data, dict):
+        return []
+
+    doi = dataset_data.get("persistentId") or source_identifier or ""
+    version = dataset_data.get("latestVersion") or dataset_data.get("datasetVersion") or dataset_data
+    title = extract_title(version) or dataset_data.get("title") or ""
+    file_access_request_dataset = version.get("fileAccessRequest")
+    file_records = dataset_data.get("files") or version.get("files") or []
+
+    rows = []
+    for file_record in file_records:
+        file_item = file_record.get("dataFile", {})
+        restricted = file_record.get("restricted")
+        file_access_request = file_item.get("fileAccessRequest")
+        if file_access_request is None:
+            file_access_request = file_access_request_dataset
+
+        rows.append({
+            "doi": doi,
+            "dataset_title": title,
+            "file_id": file_item.get("id"),
+            "file_name": file_item.get("filename"),
+            "restricted": bool(restricted),
+            "file_access_request": bool(file_access_request),
+            "restricted_new": "",
+            "file_access_request_new": "",
+        })
+
+    return rows
+
+
+def save_json(dataset_json, output_dir, identifier):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filename = output_dir / f"dataset_{identifier}.json"
+    with filename.open("w", encoding="utf-8") as handle:
+        json.dump(dataset_json, handle, indent=2)
+    return filename
+
+
+def write_csv(rows, output_path):
+    fieldnames = [
+        "doi",
+        "dataset_title",
+        "file_id",
+        "file_name",
+        "restricted",
+        "file_access_request",
+        "restricted_new",
+        "file_access_request_new",
+    ]
+    with output_path.open("w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Fetch all datasets in a Dataverse collection and export file-level rows to CSV."
+    )
+    parser.add_argument(
+        "--server-url",
+        help="Base server URL for the Dataverse/Borealis instance.",
+    )
+    parser.add_argument(
+        "--collection-alias",
+        help="Collection alias to query for datasets.",
+    )
+    parser.add_argument(
+        "--api-key",
+        help="API key for authentication.",
+    )
+    parser.add_argument(
+        "--output",
+        default="dataset_files.csv",
+        help="CSV output file name.",
+    )
+    parser.add_argument(
+        "--save-json",
+        action="store_true",
+        help="Save each retrieved dataset JSON to the local `dataset_jsons` folder.",
+    )
+    return parser.parse_args()
+
+
+def prompt_for_missing_args(args):
+    if not args.server_url:
+        args.server_url = input("Server URL: ").strip()
+    if not args.collection_alias:
+        args.collection_alias = input("Collection alias: ").strip()
+    if not args.api_key:
+        args.api_key = input("API key: ").strip()
+    return args
+
+
+def main():
+    args = parse_args()
+    args = prompt_for_missing_args(args)
+
+    server_url = normalize_server_url(args.server_url)
+    search_api, native_api = create_dataverse_apis(server_url, args.api_key)
+
+    print(f"Searching collection datasets for alias {args.collection_alias}...")
+    docs = search_collection_datasets(native_api, args.collection_alias)
+
+    if not docs:
+        print("No datasets found for the collection alias.")
+        return
+
+    print(f"Found {len(docs)} dataset(s). Fetching dataset details...")
+    all_rows = []
+    saved_json_dir = Path("dataset_jsons")
+
+    for doc in docs:
+        pid = doc.get("persistentId")
+        if not pid:
+            authority = doc.get("authority")
+            identifier = doc.get("identifier")
+            if authority and identifier:
+                pid = f"doi:{authority}/{identifier}"
+
+        if not pid:
+            print("Skipping dataset with missing persistentId:", doc)
+            continue
+
+        dataset_response = native_api.get_dataset(pid, is_pid=True)
+        dataset_data = dataset_response.json() if hasattr(dataset_response, "json") else dataset_response
+        dataset_data = dataset_data.get("data") or dataset_data
+
+        if args.save_json:
+            save_identifier = pid.replace("doi:", "").replace("/", "_")
+            save_json(dataset_data, saved_json_dir, save_identifier)
+
+        all_rows.extend(extract_dataset_rows(dataset_data, source_identifier=pid))
+
+    if not all_rows:
+        print("No file rows were extracted from the datasets.")
+        return
+
+    output_path = Path(args.output)
+    write_csv(all_rows, output_path)
+    print(f"Wrote {len(all_rows)} rows to {output_path}")
+
+
+if __name__ == "__main__":
+    main()

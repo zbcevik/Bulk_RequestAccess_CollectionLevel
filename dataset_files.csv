@@ -1,0 +1,7 @@
+doi,dataset_title,file_id,file_name,restricted,file_access_request
+https://doi.org/10.80240/FK2/DOAFHQ,Restricted 2,70218,Demotestmetadata.json,False,False
+https://doi.org/10.80240/FK2/DOAFHQ,Restricted 2,70222,ExcelExample_Corr_Reg (1).tab,True,False
+https://doi.org/10.80240/FK2/DOAFHQ,Restricted 2,70219,odesi_datasetsno_borealis.png,False,False
+https://doi.org/10.80240/FK2/PTJEYL,Restricted 1,70215,Demotestmetadata.json,False,True
+https://doi.org/10.80240/FK2/PTJEYL,Restricted 1,70214,ExcelExample_Corr_Reg (1).tab,True,True
+https://doi.org/10.80240/FK2/PTJEYL,Restricted 1,70213,odesi_datasetsno_borealis.png,False,True

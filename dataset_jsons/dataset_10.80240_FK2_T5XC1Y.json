@@ -1,0 +1,41 @@
+{
+  "persistentId": "doi:10.80240/FK2/T5XC1Y",
+  "title": "Restricted 3",
+  "citation": {
+    "fields": [
+      {
+        "typeName": "title",
+        "value": "Restricted 3"
+      }
+    ]
+  },
+  "files": [
+    {
+      "label": "ExcelExample_Corr_Reg (1).tab",
+      "restricted": true,
+      "dataFile": {
+        "id": 70226,
+        "filename": "ExcelExample_Corr_Reg (1).tab",
+        "fileAccessRequest": true
+      }
+    },
+    {
+      "label": "file_metadata.json",
+      "restricted": true,
+      "dataFile": {
+        "id": 70227,
+        "filename": "file_metadata.json",
+        "fileAccessRequest": true
+      }
+    },
+    {
+      "label": "odesi_datasetsno_borealis.png",
+      "restricted": true,
+      "dataFile": {
+        "id": 70228,
+        "filename": "odesi_datasetsno_borealis.png",
+        "fileAccessRequest": true
+      }
+    }
+  ]
+}
