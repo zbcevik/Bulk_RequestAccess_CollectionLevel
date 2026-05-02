@@ -104,6 +104,8 @@ def write_csv(rows, output_path):
         "restricted_new",
         "file_access_request_new",
     ]
+    if output_path.parent and output_path.parent != Path(""):
+        output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -129,12 +131,17 @@ def parse_args():
     parser.add_argument(
         "--output",
         default="dataset_files.csv",
-        help="CSV output file name.",
+        help="CSV output file path.",
     )
     parser.add_argument(
         "--save-json",
         action="store_true",
-        help="Save each retrieved dataset JSON to the local `dataset_jsons` folder.",
+        help="Save each retrieved dataset JSON locally.",
+    )
+    parser.add_argument(
+        "--json-dir",
+        default="dataset_jsons",
+        help="Directory to save retrieved dataset JSON files when --save-json is used.",
     )
     return parser.parse_args()
 
@@ -165,7 +172,9 @@ def main():
 
     print(f"Found {len(docs)} dataset(s). Fetching dataset details...")
     all_rows = []
-    saved_json_dir = Path("dataset_jsons")
+    saved_json_dir = Path(args.json_dir)
+    if args.save_json:
+        saved_json_dir.mkdir(parents=True, exist_ok=True)
 
     for doc in docs:
         pid = doc.get("persistentId")
@@ -196,6 +205,9 @@ def main():
     output_path = Path(args.output)
     write_csv(all_rows, output_path)
     print(f"Wrote {len(all_rows)} rows to {output_path}")
+
+    if args.save_json:
+        print(f"Saved dataset JSON files to {Path(args.json_dir).resolve()}")
 
 
 if __name__ == "__main__":

@@ -87,6 +87,8 @@ def main():
 
     fieldnames = ["doi", "dataset_title", "file_id", "file_name", "restricted", "file_access_request"]
     output_path = Path(args.output)
+    if output_path.parent and output_path.parent != Path(""):
+        output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
