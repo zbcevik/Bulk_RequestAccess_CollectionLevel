@@ -56,7 +56,7 @@ def update_file_access_request(native_api, file_id, new_value, use_pid=False):
     else:
         url = build_files_api_url(native_api, f"/files/{file_id}/metadata")
 
-    data = {"jsonData": {"fileAccessRequest": new_value}}
+    data = {"jsonData": json.dumps({"fileAccessRequest": new_value})}
     return native_api.post_request(url, data=data, auth=True)
 
 
