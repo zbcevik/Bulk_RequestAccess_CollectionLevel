@@ -13,10 +13,10 @@ This repository helps you:
 ## Prerequisites
 
 1. Install Python 3.
-2. Install `pyDataverse` if you plan to fetch or push data to Dataverse:
+2. Install required packages:
 
 ```bash
-python3 -m pip install pyDataverse
+python3 -m pip install pyDataverse httpx
 ```
 
 3. Have your Borealis/Dataverse server URL and API key ready.
@@ -148,6 +148,21 @@ Once the dry run looks correct, run:
 python3 push_json_to_dataverse.py --server-url "https://demo.borealisdata.ca" --api-key "YOUR_API_KEY" --json-dir /Users/yourname/downloads/dataset_jsons
 ```
 
+**Alternative: Push a single dataset interactively**
+
+For testing or single dataset updates, use the interactive script:
+
+```bash
+python3 push_single_dataset.py
+```
+
+This will prompt you for:
+- Server URL (default: https://demo.borealisdata.ca)
+- API Key
+- JSON file path
+
+Then it will push that specific dataset to Dataverse.
+
 This applies the changes in `dataset_jsons/` to the server.
 
 
@@ -156,8 +171,24 @@ This applies the changes in `dataset_jsons/` to the server.
 - The script only updates file records that contain `restricted` or `fileAccessRequest` values.
 - If a dataset file does not include either field, it is skipped.
 - Use `--dry-run` every time before real execution.
-- If you see `415 Unsupported Media Type`, the API endpoint may not support the method or payload being used.
-- If you see `404` for `unrestrict`, your server may not support the unrestrict endpoint or the file ID may be invalid.
+- **File restriction updates (`restricted` field)**: Some servers (like demo.borealisdata.ca) may not support individual file restrict/unrestrict operations. If you see `404` errors for `/unrestrict`, this is a server limitation, not a script issue. File restriction changes may not work on all Dataverse instances.
+- **File access request updates (`fileAccessRequest` field)**: These work reliably across all Dataverse/Borealis servers. The script uses proper multipart form-data encoding to avoid `415 Unsupported Media Type` errors.
+- **"Already restricted/unrestricted" messages**: These are treated as successes (no change needed) rather than errors.
+- For production use, test with `--dry-run` first and verify your server supports the required endpoints.
+
+### Server Compatibility Notes
+
+**Demo Borealis (demo.borealisdata.ca)**:
+- ✅ **Restrict files**: Works (can change unrestricted → restricted)
+- ❌ **Unrestrict files**: Not supported (404 error - endpoint missing)
+- ✅ **File access requests**: Works perfectly
+
+**Production Borealis/Dataverse**:
+- ✅ **Restrict files**: Should work
+- ✅ **Unrestrict files**: Should work (if server supports the endpoint)
+- ✅ **File access requests**: Works reliably
+
+If you need to unrestrict files on demo.borealisdata.ca, you'll need to do it manually through the web interface.
 
 
 ## Script summary
@@ -173,3 +204,14 @@ This applies the changes in `dataset_jsons/` to the server.
 
 ### `push_json_to_dataverse.py`
 - Pushes the updated JSON file metadata back to your Borealis/Dataverse server.
+- Uses proper multipart form-data encoding for `fileAccessRequest` updates.
+- Handles "already restricted/unrestricted" responses as successes.
+- Supports both JSON structures: `files` at top level or nested in `datasetVersion.files`.
+- Supports both file restriction and access request metadata updates.
+
+### `push_single_dataset.py`
+- Interactive script to push a single dataset JSON file to Dataverse.
+- Prompts for server URL, API key, and JSON file path.
+- Supports both JSON structures: `files` at top level or nested in `datasetVersion.files`.
+- Uses the same improved error handling and encoding as the bulk script.
+- Accepts command line arguments: `--server-url`, `--api-key`, `--json-path`, `--dry-run`.

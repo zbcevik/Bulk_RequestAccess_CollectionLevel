@@ -1,0 +1,653 @@
+{
+    "id": 845786,
+    "identifier": "SP3/AUDTTU",
+    "persistentUrl": "https://doi.org/10.5683/SP3/AUDTTU",
+    "protocol": "doi",
+    "authority": "10.5683",
+    "publisher": "Borealis",
+    "publicationDate": "2024-12-05",
+    "storageIdentifier": "s3://10.5683/SP3/AUDTTU",
+    "datasetType": "dataset",
+    "datasetVersion": {
+        "id": 47371,
+        "datasetId": 845786,
+        "datasetPersistentId": "doi:10.5683/SP3/AUDTTU",
+        "storageIdentifier": "s3://10.5683/SP3/AUDTTU",
+        "versionNumber": 1,
+        "versionMinorNumber": 0,
+        "versionState": "RELEASED",
+        "latestVersionPublishingState": "RELEASED",
+        "productionDate": "2019",
+        "lastUpdateTime": "2024-12-05T21:43:53Z",
+        "releaseTime": "2024-12-05T21:43:53Z",
+        "createTime": "2024-11-04T19:57:37Z",
+        "publicationDate": "2024-12-05",
+        "citationDate": "2024-12-05",
+        "termsOfUse": "<h2>PCCF License</h2>\n<p><b>End-use Licence Agreement for Postal CodeOM Conversion File, Postal CodesOM by Federal Ridings File and Postal CodeOM Conversion File Plus (“data product”).</b></p>\n\n<p>The Government of Canada (Statistics Canada) is the owner or a licensee of all intellectual property rights in this data product. With your payment of the requisite fee, you (hereinafter referred to as ‘the Licensee’) are granted a non-exclusive, non-assignable and non-transferable licence to use this data product subject to the terms below. This licence is not a sale of any or all of the rights of the owner(s). The data product includes information taken with permission from © Canada Post Corporation. All rights reserved. Information taken with permission from Canada Post Corporation does not form part of the Government of Canada open data portal.</p>\n\n<h3>Terms of use</h3>\n<ol>\n<li>The Licensee shall not lend, rent, lease, sublicense, distribute, make public, transfer or sell any part of the data product nor any right granted under this agreement to any person outside the licensed organization or to any other organization.</li>\n\n<li>The Licensee shall not disassemble, decompile or in any way attempt to reverse engineer any part of the data product.</li>\n\n<li>The Licensee shall not use any part of the data product to develop or derive any other data product or data service for external distribution or commercial sale.</li>\n\n<li>The Licensee shall not use the data product other than for the purpose of matching postal codeOM data to geography in accordance with Appendix ‘A’.</li>\n\n<li>The Licensee shall not use the data product for the following mail preparation purposes:\n<ul>\n<li>addressing mail;</li>\n<li>presorting addressed mail;</li>\n<li>preparing unaddressed mail by householder count for delivery</li>\n</ul></li>\n<li>The Licensee agrees not to merge or link the data product with any other databases in such a fashion that gives the appearance that the Licensee may have received, or had access to, information held by Statistics Canada about any identifiable individual, family, household, organization or business.</li>\n\n<li><p>The Licensee is granted rights of use of the content of this data product for the purpose expressly described in Appendix ‘A’, attached, and for no other purpose. In such cases, the source of the data must be acknowledged in all documents and communications by providing the following source citation at the bottom of each table and graph:</p>\n\n<p>Source: (or Adapted from) Statistics Canada (Select either Postal CodeOM Conversion File or Postal CodesOM by Federal Ridings File and Postal CodeOM Conversion File Plus (reference date) which is based on data licensed from Canada Post Corporation.</p></li>\n\n<li>The Licensee may publish an extract of up to 1% of the data product pursuant to Appendix ‘A’. This permission includes the use of the extracted data in support of analyses and in reporting of results and conclusions. The Licensee shall obtain approval from Statistics Canada before publishing extract of the data product in excess of 1%.</li>\n\n<li>The Licensee is authorized to provide the data product to contractors/consultants only for the purpose of ?providing data manipulation and consulting services exclusively to Licensee. Upon completion of work, the contractor/consultant must i) return all data products to Licensee, and ii) delete the data product from their systems and premises.? Contractors or consultants may not use the data product or derived products for their own purposes or to offer services to third parties.</li>\n\n<li>The Licensee must display the following disclaimer on each search access point if the data product is used in a search engine application pursuant to Appendix ‘A’: “this tool does not validate Postal codesOM”.</li>\n\n<li>The Licensee agrees to permit Statistics Canada to provide to Canada Post upon request, a copy of this signed agreement for audit purposes only.</li></ol>\n\n<h3>Term</h3>\n<p>This licence is effective as of the date of signature and shall automatically terminate if any of the terms and conditions are violated.</p>\n\n<h3>Termination</h3>\n<p>Any violation of this licence renders it void and of no effect. This agreement will terminate automatically without notice if the Licensee fails to comply with any of the terms of this agreement.</p>\n\n<p>Statistics Canada or the Licensee may terminate this agreement without cause upon thirty (30) day written notice or at a time otherwise agreed upon by both parties. In the event of termination, the Licensee must immediately return the data product to Statistics Canada or destroy it and certify this destruction in writing to Statistics Canada.</p>\n\n<h3>Warranties and disclaimers</h3>\n<p>This data product is provided ‘as-is,’ and Statistics Canada and its licensors make no warranty, either express or implied, including but not limited to, warranties of merchantability and fitness for a particular purpose. In no event will Statistics Canada or its licensors be liable for any direct, special, indirect, consequential or other damages, however caused.</p>\n\n<h3>Indemnification</h3>\n<p>The Licensee shall at all times indemnify and save harmless Statistics Canada its officers, servants and agents from and against all claims, demands, losses, damages, costs, actions, or other proceedings made, sustained, brought or prosecuted by any person, in any manner, based upon, occasioned by or attributed to any injury, infringement, or damage arising out of the use of the data product, or arising out of a breach, by the Licensee, of any of its obligations under this agreement.</p>\n\n<h3>Acceptance of terms</h3>\n<p>It is your responsibility to ensure that your use of this data product complies with these terms. Any infringement of Statistics Canada’s rights may result in legal action.</p>\n\n<p>Any use whatsoever of this data product shall constitute your acceptance of the terms of this agreement.</p>\n\n<h3>Appendix A</h3>\n<p><b>Approved Postal Code Data Matching Uses for DLI Accredited Canadian Post Secondary Institution</b></p>\n\n<p>Matching Postal CodeOM data to geography for:</p>\n<ul>\n<li><p>Teaching and learning purposes.</p>\n\n<p>E.g.: Students can download PCCF on their laptop to do their assignments. This includes projects, maps, analytical papers, etc. Faculty can download and use the PCCF in teaching exercises.</p></li>\n\n<li><p>Research purposes</p>\n\n<p>E.g.: Can be used in analysis to write articles that are published in journals. The data is not shared but the results are published. This also includes thesis for Masters or Doctorate where results are required to be public.</p></li>\n\n<li>Planning purposes - where the institution can use the information in planning student recruitment activities or find out where these students are coming from.</li></ul>\n",
+        "citationRequirements": "<p>Statistics Canada must be fully acknowledged as follows: Source (or “Adapted from”, if appropriate): Statistics Canada, year of publication, name of product, catalogue number, volume and issue numbers, reference period and page(s). Otherwise, no part of this publication may be reproduced, stored in a retrieval system or transmitted in any form, by any means—electronic, mechanical or photocopy—or for any purposes without prior written permission of Licensing Services, Client Services Division, Statistics Canada, Ottawa, Ontario, Canada K1A 0T6.</p>",
+        "conditions": "<a href=\"http://odesi2.scholarsportal.info/documentation/PCCF/census_years/mastercopies/PCCF-End-user-License.pdf\">PCCF End user license</a>",
+        "disclaimer": "<p>All rights reserved. The content of this electronic publication may be reproduced, in whole or in part, and by any means, without further permission from Statistics Canada, subject to the following conditions: that it be done solely for the purposes of private study, research, criticism, review or newspaper summary, and/or for non-commercial purposes.</p>",
+        "termsOfAccess": "<h2>PCCF License</h2>\n<p><b>End-use Licence Agreement for Postal CodeOM Conversion File, Postal CodesOM by Federal Ridings File and Postal CodeOM Conversion File Plus (“data product”).</b></p>\n\n<p>The Government of Canada (Statistics Canada) is the owner or a licensee of all intellectual property rights in this data product. With your payment of the requisite fee, you (hereinafter referred to as ‘the Licensee’) are granted a non-exclusive, non-assignable and non-transferable licence to use this data product subject to the terms below. This licence is not a sale of any or all of the rights of the owner(s). The data product includes information taken with permission from © Canada Post Corporation. All rights reserved. Information taken with permission from Canada Post Corporation does not form part of the Government of Canada open data portal.</p>\n\n<h3>Terms of use</h3>\n<ol>\n<li>The Licensee shall not lend, rent, lease, sublicense, distribute, make public, transfer or sell any part of the data product nor any right granted under this agreement to any person outside the licensed organization or to any other organization.</li>\n\n<li>The Licensee shall not disassemble, decompile or in any way attempt to reverse engineer any part of the data product.</li>\n\n<li>The Licensee shall not use any part of the data product to develop or derive any other data product or data service for external distribution or commercial sale.</li>\n\n<li>The Licensee shall not use the data product other than for the purpose of matching postal codeOM data to geography in accordance with Appendix ‘A’.</li>\n\n<li>The Licensee shall not use the data product for the following mail preparation purposes:\n<ul>\n<li>addressing mail;</li>\n<li>presorting addressed mail;</li>\n<li>preparing unaddressed mail by householder count for delivery</li>\n</ul></li>\n<li>The Licensee agrees not to merge or link the data product with any other databases in such a fashion that gives the appearance that the Licensee may have received, or had access to, information held by Statistics Canada about any identifiable individual, family, household, organization or business.</li>\n\n<li><p>The Licensee is granted rights of use of the content of this data product for the purpose expressly described in Appendix ‘A’, attached, and for no other purpose. In such cases, the source of the data must be acknowledged in all documents and communications by providing the following source citation at the bottom of each table and graph:</p>\n\n<p>Source: (or Adapted from) Statistics Canada (Select either Postal CodeOM Conversion File or Postal CodesOM by Federal Ridings File and Postal CodeOM Conversion File Plus (reference date) which is based on data licensed from Canada Post Corporation.</p></li>\n\n<li>The Licensee may publish an extract of up to 1% of the data product pursuant to Appendix ‘A’. This permission includes the use of the extracted data in support of analyses and in reporting of results and conclusions. The Licensee shall obtain approval from Statistics Canada before publishing extract of the data product in excess of 1%.</li>\n\n<li>The Licensee is authorized to provide the data product to contractors/consultants only for the purpose of ?providing data manipulation and consulting services exclusively to Licensee. Upon completion of work, the contractor/consultant must i) return all data products to Licensee, and ii) delete the data product from their systems and premises.? Contractors or consultants may not use the data product or derived products for their own purposes or to offer services to third parties.</li>\n\n<li>The Licensee must display the following disclaimer on each search access point if the data product is used in a search engine application pursuant to Appendix ‘A’: “this tool does not validate Postal codesOM”.</li>\n\n<li>The Licensee agrees to permit Statistics Canada to provide to Canada Post upon request, a copy of this signed agreement for audit purposes only.</li></ol>\n\n<h3>Term</h3>\n<p>This licence is effective as of the date of signature and shall automatically terminate if any of the terms and conditions are violated.</p>\n\n<h3>Termination</h3>\n<p>Any violation of this licence renders it void and of no effect. This agreement will terminate automatically without notice if the Licensee fails to comply with any of the terms of this agreement.</p>\n\n<p>Statistics Canada or the Licensee may terminate this agreement without cause upon thirty (30) day written notice or at a time otherwise agreed upon by both parties. In the event of termination, the Licensee must immediately return the data product to Statistics Canada or destroy it and certify this destruction in writing to Statistics Canada.</p>\n\n<h3>Warranties and disclaimers</h3>\n<p>This data product is provided ‘as-is,’ and Statistics Canada and its licensors make no warranty, either express or implied, including but not limited to, warranties of merchantability and fitness for a particular purpose. In no event will Statistics Canada or its licensors be liable for any direct, special, indirect, consequential or other damages, however caused.</p>\n\n<h3>Indemnification</h3>\n<p>The Licensee shall at all times indemnify and save harmless Statistics Canada its officers, servants and agents from and against all claims, demands, losses, damages, costs, actions, or other proceedings made, sustained, brought or prosecuted by any person, in any manner, based upon, occasioned by or attributed to any injury, infringement, or damage arising out of the use of the data product, or arising out of a breach, by the Licensee, of any of its obligations under this agreement.</p>\n\n<h3>Acceptance of terms</h3>\n<p>It is your responsibility to ensure that your use of this data product complies with these terms. Any infringement of Statistics Canada’s rights may result in legal action.</p>\n\n<p>Any use whatsoever of this data product shall constitute your acceptance of the terms of this agreement.</p>\n\n<h3>Appendix A</h3>\n<p><b>Approved Postal Code Data Matching Uses for DLI Accredited Canadian Post Secondary Institution</b></p>\n\n<p>Matching Postal CodeOM data to geography for:</p>\n<ul>\n<li><p>Teaching and learning purposes.</p>\n\n<p>E.g.: Students can download PCCF on their laptop to do their assignments. This includes projects, maps, analytical papers, etc. Faculty can download and use the PCCF in teaching exercises.</p></li>\n\n<li><p>Research purposes</p>\n\n<p>E.g.: Can be used in analysis to write articles that are published in journals. The data is not shared but the results are published. This also includes thesis for Masters or Doctorate where results are required to be public.</p></li>\n\n<li>Planning purposes - where the institution can use the information in planning student recruitment activities or find out where these students are coming from.</li></ul>\n",
+        "dataAccessPlace": "Statistics Canada",
+        "contactForAccess": "Data Liberation Initiative (DLI)",
+        "fileAccessRequest": true,
+        "metadataBlocks": {
+            "citation": {
+                "displayName": "Citation Metadata",
+                "name": "citation",
+                "fields": [
+                    {
+                        "typeName": "title",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Postal Code Conversion File [Canada], August 2019, Census of Canada 2016"
+                    },
+                    {
+                        "typeName": "subtitle",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Postal Code Conversion File, August 2019"
+                    },
+                    {
+                        "typeName": "alternativeTitle",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "PCCF [Canada], August 2019",
+                            "Fichier de conversion des codes postaux [Canada], août 2019"
+                        ]
+                    },
+                    {
+                        "typeName": "author",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "authorName": {
+                                    "typeName": "authorName",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Statistics Canada. Geography Division"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "datasetContact",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "datasetContactName": {
+                                    "typeName": "datasetContactName",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Odesi Service"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "dsDescription",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "dsDescriptionValue": {
+                                    "typeName": "dsDescriptionValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "<p>The Postal Code Conversion File (PCCF) is a digital file which provides a correspondence between the Canada Post Corporation (CPC) six-character postal code and Statistics Canada's standard geographic areas for which census data and other statistics are produced. Through the link between postal codes and standard geographic areas, the PCCF permits the integration of data from various sources.  The Single Link Indicator provides one best link for every postal code, as there are multiple records for many postal codes.</p> \n\n<p>To obtain the postal code conversion file or for questions, consult the <a href=\"https://www.statcan.gc.ca/eng/dli/contact\" target=\"_blank\"> DLI contact</a> at your educational institution.</p>  \n\n<p>The geographic coordinates attached to each postal code on the PCCF are commonly used to map the distribution of data for spatial analysis (e.g., clients, activities). The location information is a powerful tool for planning, or research purposes.</p>  \n\n <p>The geographic coordinates, which represent the standard geostatistical areas linked to each postal code<sup>OM</sup> on the PCCF, are commonly used to map the distribution of data for spatial analysis (e.g., clients, activities). The location information is a powerful tool for marketing, planning, or research purposes. In April 1983, the Statistical Registers and Geography Division released the first version of the PCCF, which linked postal codes<sup>OM</sup> to 1981 Census geographic areas and included geographic coordinates. Since then, the file has been updated on a regular basis to reflect changes. For this release of the PCCF, the vast majority of the postal codes<sup>OM</sup> are directly geocoded to 2016 Census geography while others are linked via various conversion processes. A quality indicator for the confidence of this linkage is available in the PCCF.<p>"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "subject",
+                        "multiple": true,
+                        "typeClass": "controlledVocabulary",
+                        "value": [
+                            "Social Sciences"
+                        ]
+                    },
+                    {
+                        "typeName": "keyword",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census agglomeration"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census consolidated subdivision (CCS)"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census division"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census Geography"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census metropolitan area"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census subdivision"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Census tract"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Designated place"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Dissemination area"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Dissemination block"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Economic region"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Geocoding"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Postal Codes"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Rural area"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Rural fringe"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Urban area"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Urban core"
+                                }
+                            },
+                            {
+                                "keywordValue": {
+                                    "typeName": "keywordValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Urban fringe"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "topicClassification",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "topicClassValue": {
+                                    "typeName": "topicClassValue",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Geography"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "publication",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "publicationCitation": {
+                                    "typeName": "publicationCitation",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Notes: Most up-to-date postal codes corresponding to 2016 Census Geography, August 2019.;Notes: Contains records for National postal codes;"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "language",
+                        "multiple": true,
+                        "typeClass": "controlledVocabulary",
+                        "value": [
+                            "English"
+                        ]
+                    },
+                    {
+                        "typeName": "producer",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "producerName": {
+                                    "typeName": "producerName",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Statistics Canada. Geography Division"
+                                },
+                                "producerAbbreviation": {
+                                    "typeName": "producerAbbreviation",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "STC"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "productionDate",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "2019"
+                    },
+                    {
+                        "typeName": "productionPlace",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "Statistics Canada, Ottawa, Ontario, Canada"
+                        ]
+                    },
+                    {
+                        "typeName": "distributor",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "distributorName": {
+                                    "typeName": "distributorName",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Data Liberation Initiative"
+                                },
+                                "distributorAffiliation": {
+                                    "typeName": "distributorAffiliation",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Statistics Canada"
+                                },
+                                "distributorAbbreviation": {
+                                    "typeName": "distributorAbbreviation",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "DLI"
+                                },
+                                "distributorURL": {
+                                    "typeName": "distributorURL",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "https://www.statcan.gc.ca/en/microdata/dli"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "depositor",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Odesi MarkIt Group"
+                    },
+                    {
+                        "typeName": "dateOfDeposit",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "2024-11-04"
+                    },
+                    {
+                        "typeName": "kindOfData",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "Aggregate data",
+                            "Geographic data"
+                        ]
+                    },
+                    {
+                        "typeName": "series",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "seriesName": {
+                                    "typeName": "seriesName",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "Postal Code Conversion File"
+                                },
+                                "seriesInformation": {
+                                    "typeName": "seriesInformation",
+                                    "multiple": false,
+                                    "typeClass": "primitive",
+                                    "value": "The Postal Code Conversion File (PCCF) is a digital file which provides a correspondence between the Canada Post Corporation (CPC) six-character postal code and Statistics Canada's standard geographic areas for which census data and other statistics are produced. Through the link between postal codes and standard geographic areas, the PCCF permits the integration of data from various sources. The PCCF links the six-character postal codes to the standard 2016 Census geographic areas (such as dissemination areas, census tracts, and census subdivisions). By linking postal codes to the Statistics Canada geographic areas, the file facilitates the extraction and subsequent aggregation of data for selected geographic areas. The PCCF also associates each postal code with a longitude and latitude coordinate to support mapping applications."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "dataSources",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "The PCCF is a flat file providing attributes for postal codes<sup>OM</sup> and for those dissemination area(s), dissemination block(s), etc. linked to the postal code<sup>OM</sup>. Most of these attributes are taken from two independent sources. Some attributes are also created for the PCCF. The geographic code, type, and name of all higher level standard geographic areas in which a blockface, dissemination block or dissemination area is located are extracted from the Spatial Data Infrastructure. The information relevant to each postal code<sup>OM</sup> - birth date, retirement date, delivery mode type, type of postal code<sup>OM</sup> and CPC community name - is carried forward from the CPC address look-up file and auxiliary files."
+                        ]
+                    }
+                ]
+            },
+            "geospatial": {
+                "displayName": "Geospatial Metadata",
+                "name": "geospatial",
+                "fields": [
+                    {
+                        "typeName": "geographicCoverage",
+                        "multiple": true,
+                        "typeClass": "compound",
+                        "value": [
+                            {
+                                "country": {
+                                    "typeName": "country",
+                                    "multiple": false,
+                                    "typeClass": "controlledVocabulary",
+                                    "value": "Canada"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "geographicUnit",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "Province",
+                            "Territory"
+                        ]
+                    }
+                ]
+            },
+            "socialscience": {
+                "displayName": "Social Science and Humanities Metadata",
+                "name": "socialscience",
+                "fields": [
+                    {
+                        "typeName": "unitOfAnalysis",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "Postal codes"
+                        ]
+                    },
+                    {
+                        "typeName": "universe",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "All existing postal codes in Canada."
+                        ]
+                    },
+                    {
+                        "typeName": "timeMethod",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Cross-sectional"
+                    },
+                    {
+                        "typeName": "dataCollector",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Statistics Canada"
+                    },
+                    {
+                        "typeName": "frequencyOfDataCollection",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Bi-annual"
+                    },
+                    {
+                        "typeName": "collectionMode",
+                        "multiple": true,
+                        "typeClass": "primitive",
+                        "value": [
+                            "The Postal Code<sup>OM</sup> Conversion File (PCCF) is updated and released on a regular basis. The regular maintenance of the file takes all postal code<sup>OM</sup> changes continually introduced by Canada Post Corporation (CPC) and determines the corresponding census geographic areas. Every five years, after each census, the PCCF is aligned with the new census geographic areas. Every month, Statistics Canada obtains files from CPC containing the latest postal codes<sup>OM</sup>, address ranges and other attributes such as delivery mode type. Whenever possible, postal codeOM address ranges are linked to a blockface, dissemination block or dissemination area. When the blockface or dissemination block cannot be precisely determined, the postal code<sup>OM</sup> is coded to a dissemination area(s). All other postal code<sup>OM</sup> links to higher level geographic areas are derived from the blockface, dissemination block or dissemination area."
+                        ]
+                    },
+                    {
+                        "typeName": "weighting",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "The single link indicator (SLI) provides a geographic record for mapping a postal code representative point. It can be used to establish a one-to-one relationship between postal codes and dissemination areas, dissemination blocks, or block-faces. The SLI has the value of '1' to flag one record of an active postal code. Every set of retired records for a postal code, for a given retirement date, has one SLI equal to '1'. The SLI value '0' indicates additional records. The retired postal codes have a delivery mode type of Z. There can be more than one record for a given postal code where SLI=1, if the postal code has been retired and then \"rebirthed\", or if for any reason the Delivery Mode Type (DMT) has changed. There should however be only be one record with SLI=1 for a given combination of postal code and DMT. If a postal code has a DMT of Z (retired) and any other DMT, you would want to keep only the non-retired records, which should eliminate most of the duplicate SLI records for a given postal code. But if there is only a retired record for the postal code, keep it. However, it may or may not be appropriate to force only 1 record per postal code (using the SLI), as many postal codes serve a very wide area spanning multiple blocks, DAs and CSDs."
+                    },
+                    {
+                        "typeName": "samplingErrorEstimates",
+                        "multiple": false,
+                        "typeClass": "primitive",
+                        "value": "Postal codes do not respect census geographic boundaries and so may be linked to more than one standard geographic area, or assigned to more than one set of coordinates. Therefore, one postal code may be represented by more than one record. Postal codes can also straddle provincial boundaries. See Postal code structure for more information. Postal code data are available as a national file or as separate provincial/territorial files identified by using Standard Geographic Classification (SGC) codes. This is summarized in Data file naming convention."
+                    }
+                ]
+            }
+        },
+        "files": [
+            {
+                "description": "Data Documentation – Reference Guide\n",
+                "label": "PCCF_201908-eng.pdf",
+                "restricted": true,
+                "directoryLabel": "Survey documentation",
+                "version": 1,
+                "datasetVersionId": 47371,
+                "categories": [
+                    "Documentation"
+                ],
+                "dataFile": {
+                    "id": 845790,
+                    "persistentId": "",
+                    "filename": "PCCF_201908-eng.pdf",
+                    "contentType": "application/pdf",
+                    "friendlyType": "Adobe PDF",
+                    "filesize": 607522,
+                    "description": "Data Documentation – Reference Guide\n",
+                    "categories": [
+                        "Documentation"
+                    ],
+                    "storageIdentifier": "s3://dataverse:192f8bff873-bd6f567b303b",
+                    "rootDataFileId": -1,
+                    "md5": "398f848bf0da78a1af53df2f02e72830",
+                    "checksum": {
+                        "type": "MD5",
+                        "value": "398f848bf0da78a1af53df2f02e72830"
+                    },
+                    "tabularData": false,
+                    "creationDate": "2024-11-04",
+                    "publicationDate": "2024-12-05",
+                    "fileAccessRequest": false
+                }
+            },
+            {
+                "description": "Data in SPSS syntax format\n",
+                "label": "PCCF_201908.sps",
+                "restricted": true,
+                "directoryLabel": "Survey documentation",
+                "version": 1,
+                "datasetVersionId": 47371,
+                "categories": [
+                    "Documentation"
+                ],
+                "dataFile": {
+                    "id": 845787,
+                    "persistentId": "",
+                    "filename": "PCCF_201908.sps",
+                    "contentType": "application/x-spss-syntax",
+                    "friendlyType": "SPSS Syntax",
+                    "filesize": 28254,
+                    "description": "Data in SPSS syntax format\n",
+                    "categories": [
+                        "Documentation"
+                    ],
+                    "storageIdentifier": "s3://dataverse:192f8bff87f-caa15ba8d3d9",
+                    "rootDataFileId": -1,
+                    "md5": "20aadee25cc4948c6d70352eee052284",
+                    "checksum": {
+                        "type": "MD5",
+                        "value": "20aadee25cc4948c6d70352eee052284"
+                    },
+                    "tabularData": false,
+                    "creationDate": "2024-11-04",
+                    "publicationDate": "2024-12-05",
+                    "fileAccessRequest": true
+                }
+            },
+            {
+                "description": "Data in SPSS format\n",
+                "label": "pccfNat_fccpNat_082019.sav",
+                "restricted": false,
+                "directoryLabel": "SPSS",
+                "version": 2,
+                "datasetVersionId": 47371,
+                "categories": [
+                    "Data"
+                ],
+                "dataFile": {
+                    "id": 845789,
+                    "persistentId": "",
+                    "filename": "pccfNat_fccpNat_082019.sav",
+                    "contentType": "application/x-spss-sav",
+                    "friendlyType": "SPSS Binary",
+                    "filesize": 535452087,
+                    "description": "Data in SPSS format\n",
+                    "categories": [
+                        "Data"
+                    ],
+                    "storageIdentifier": "s3://dataverse:192f8bfedfa-5020c4738336",
+                    "rootDataFileId": -1,
+                    "md5": "d88288fa4272b3883f7a360d4997ad63",
+                    "checksum": {
+                        "type": "MD5",
+                        "value": "d88288fa4272b3883f7a360d4997ad63"
+                    },
+                    "tabularData": false,
+                    "creationDate": "2024-11-04",
+                    "publicationDate": "2024-12-05",
+                    "fileAccessRequest": true
+                }
+            },
+            {
+                "description": "Data in text file format \n",
+                "label": "pccfNat_fccpNat_082019.txt",
+                "restricted": true,
+                "directoryLabel": "TXT",
+                "version": 2,
+                "datasetVersionId": 47371,
+                "categories": [
+                    "Data"
+                ],
+                "dataFile": {
+                    "id": 845788,
+                    "persistentId": "",
+                    "filename": "pccfNat_fccpNat_082019.txt",
+                    "contentType": "text/plain",
+                    "friendlyType": "Plain Text",
+                    "filesize": 377792301,
+                    "description": "Data in text file format \n",
+                    "categories": [
+                        "Data"
+                    ],
+                    "storageIdentifier": "s3://dataverse:192f8bff884-3301ba50eb94",
+                    "rootDataFileId": -1,
+                    "md5": "bbca3c099cf9a6b3979d94a27e14fa13",
+                    "checksum": {
+                        "type": "MD5",
+                        "value": "bbca3c099cf9a6b3979d94a27e14fa13"
+                    },
+                    "tabularData": false,
+                    "creationDate": "2024-11-04",
+                    "publicationDate": "2024-12-05",
+                    "fileAccessRequest": false
+                }
+            }
+        ],
+        "citation": "Statistics Canada. Geography Division, 2024, \"Postal Code Conversion File [Canada], August 2019, Census of Canada 2016\", https://doi.org/10.5683/SP3/AUDTTU, Borealis, V1"
+    }
+}
