@@ -1,11 +1,207 @@
 {
-  "persistentId": "doi:10.80240/FK2/6RZD0P",
-  "title": "Restricted 5",
-  "citation": {
-    "fields": [
+  "id": 70233,
+  "identifier": "FK2/6RZD0P",
+  "persistentUrl": "https://doi.org/10.80240/FK2/6RZD0P",
+  "protocol": "doi",
+  "authority": "10.80240",
+  "separator": "/",
+  "publisher": "Borealis",
+  "publicationDate": "2026-05-01",
+  "storageIdentifier": "s3://10.80240/FK2/6RZD0P",
+  "datasetType": "dataset",
+  "latestVersion": {
+    "id": 10387,
+    "datasetId": 70233,
+    "datasetPersistentId": "doi:10.80240/FK2/6RZD0P",
+    "datasetType": "dataset",
+    "storageIdentifier": "s3://10.80240/FK2/6RZD0P",
+    "internalVersionNumber": 3,
+    "versionState": "DRAFT",
+    "latestVersionPublishingState": "DRAFT",
+    "lastUpdateTime": "2026-05-04T18:06:20Z",
+    "createTime": "2026-05-04T18:06:18Z",
+    "publicationDate": "2026-05-01",
+    "citationDate": "2026-05-01",
+    "license": {
+      "name": "CC0 1.0",
+      "uri": "http://creativecommons.org/publicdomain/zero/1.0",
+      "iconUri": "https://licensebuttons.net/p/zero/1.0/88x31.png",
+      "rightsIdentifier": "CC0-1.0",
+      "rightsIdentifierScheme": "SPDX",
+      "schemeUri": "https://spdx.org/licenses/",
+      "languageCode": "en"
+    },
+    "termsOfAccess": "Terms of access",
+    "fileAccessRequest": true,
+    "metadataBlocks": {
+      "citation": {
+        "displayName": "Citation Metadata",
+        "name": "citation",
+        "fields": [
+          {
+            "typeName": "title",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "Restricted 5"
+          },
+          {
+            "typeName": "author",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [
+              {
+                "authorName": {
+                  "typeName": "authorName",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "Cevik, Zeynep"
+                },
+                "authorAffiliation": {
+                  "typeName": "authorAffiliation",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "University of Toronto"
+                }
+              }
+            ]
+          },
+          {
+            "typeName": "datasetContact",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [
+              {
+                "datasetContactName": {
+                  "typeName": "datasetContactName",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "Cevik, Zeynep"
+                },
+                "datasetContactAffiliation": {
+                  "typeName": "datasetContactAffiliation",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "University of Toronto"
+                }
+              }
+            ]
+          },
+          {
+            "typeName": "dsDescription",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [
+              {
+                "dsDescriptionValue": {
+                  "typeName": "dsDescriptionValue",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "Two files are restricted, one is enable request, one is not enable request. This did not work, if latest restrict file option is not enable then all of them are no enable request. I added one more restricted file which has enable request access. Then all of them become available to request access. Partial customization in enable/no enable request is not possible"
+                }
+              }
+            ]
+          },
+          {
+            "typeName": "subject",
+            "multiple": true,
+            "typeClass": "controlledVocabulary",
+            "value": [
+              "Social Sciences"
+            ]
+          },
+          {
+            "typeName": "depositor",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "Cevik, Zeynep"
+          },
+          {
+            "typeName": "dateOfDeposit",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "2026-05-01"
+          }
+        ]
+      }
+    },
+    "files": [
       {
-        "typeName": "title",
-        "value": "Restricted 5"
+        "label": "file_metadata.json",
+        "restricted": false,
+        "version": 1,
+        "datasetVersionId": 10387,
+        "dataFile": {
+          "id": 70236,
+          "persistentId": "",
+          "filename": "file_metadata.json",
+          "contentType": "application/json",
+          "friendlyType": "JSON",
+          "filesize": 5610,
+          "storageIdentifier": "s3://dataverse:19de4970420-bf43f21aa530",
+          "rootDataFileId": -1,
+          "md5": "d4e209d26e6bd24c83c65dd7eb9670c6",
+          "checksum": {
+            "type": "MD5",
+            "value": "d4e209d26e6bd24c83c65dd7eb9670c6"
+          },
+          "tabularData": false,
+          "creationDate": "2026-05-01",
+          "publicationDate": "2026-05-01",
+          "lastUpdateTime": "2026-05-04T18:06:20Z",
+          "fileAccessRequest": true
+        }
+      },
+      {
+        "label": "odesi_datasetsno_borealis.png",
+        "restricted": false,
+        "version": 2,
+        "datasetVersionId": 10387,
+        "dataFile": {
+          "id": 70235,
+          "persistentId": "",
+          "filename": "odesi_datasetsno_borealis.png",
+          "contentType": "image/png",
+          "friendlyType": "PNG Image",
+          "filesize": 85286,
+          "storageIdentifier": "s3://dataverse:19de4971f85-8c6332a81067",
+          "rootDataFileId": -1,
+          "md5": "1bbbaaa269a7bba6d48531d9edae33d7",
+          "checksum": {
+            "type": "MD5",
+            "value": "1bbbaaa269a7bba6d48531d9edae33d7"
+          },
+          "tabularData": false,
+          "creationDate": "2026-05-01",
+          "publicationDate": "2026-05-01",
+          "lastUpdateTime": "2026-05-04T18:06:20Z",
+          "fileAccessRequest": true
+        }
+      },
+      {
+        "label": "odesi_datasetsno_odesi.png",
+        "restricted": false,
+        "version": 2,
+        "datasetVersionId": 10387,
+        "dataFile": {
+          "id": 70234,
+          "persistentId": "",
+          "filename": "odesi_datasetsno_odesi.png",
+          "contentType": "image/png",
+          "friendlyType": "PNG Image",
+          "filesize": 113509,
+          "storageIdentifier": "s3://dataverse:19de49743b3-7c1b2c9ac9fb",
+          "rootDataFileId": -1,
+          "md5": "9870bedac13d024954f76db40d55165e",
+          "checksum": {
+            "type": "MD5",
+            "value": "9870bedac13d024954f76db40d55165e"
+          },
+          "tabularData": false,
+          "creationDate": "2026-05-01",
+          "publicationDate": "2026-05-01",
+          "lastUpdateTime": "2026-05-04T18:06:20Z",
+          "fileAccessRequest": true
+        }
       }
     ]
   },
@@ -16,7 +212,7 @@
       "dataFile": {
         "id": 70236,
         "filename": "file_metadata.json",
-        "fileAccessRequest": true
+        "fileAccessRequest": false
       }
     },
     {
@@ -25,7 +221,7 @@
       "dataFile": {
         "id": 70235,
         "filename": "odesi_datasetsno_borealis.png",
-        "fileAccessRequest": true
+        "fileAccessRequest": false
       }
     },
     {
@@ -34,7 +230,7 @@
       "dataFile": {
         "id": 70234,
         "filename": "odesi_datasetsno_odesi.png",
-        "fileAccessRequest": true
+        "fileAccessRequest": false
       }
     }
   ]

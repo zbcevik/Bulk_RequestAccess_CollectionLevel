@@ -1,18 +1,220 @@
 {
-  "persistentId": "doi:10.80240/FK2/T5XC1Y",
-  "title": "Restricted 3",
-  "citation": {
-    "fields": [
+  "id": 70225,
+  "identifier": "FK2/T5XC1Y",
+  "persistentUrl": "https://doi.org/10.80240/FK2/T5XC1Y",
+  "protocol": "doi",
+  "authority": "10.80240",
+  "separator": "/",
+  "publisher": "Borealis",
+  "publicationDate": "2026-05-01",
+  "storageIdentifier": "s3://10.80240/FK2/T5XC1Y",
+  "datasetType": "dataset",
+  "latestVersion": {
+    "id": 10389,
+    "datasetId": 70225,
+    "datasetPersistentId": "doi:10.80240/FK2/T5XC1Y",
+    "datasetType": "dataset",
+    "storageIdentifier": "s3://10.80240/FK2/T5XC1Y",
+    "internalVersionNumber": 1,
+    "versionState": "DRAFT",
+    "latestVersionPublishingState": "DRAFT",
+    "UNF": "UNF:6:uzG3raBPZ6Y9W95lFd13yg==",
+    "lastUpdateTime": "2026-05-04T18:06:26Z",
+    "createTime": "2026-05-04T18:06:26Z",
+    "publicationDate": "2026-05-01",
+    "citationDate": "2026-05-01",
+    "license": {
+      "name": "CC0 1.0",
+      "uri": "http://creativecommons.org/publicdomain/zero/1.0",
+      "iconUri": "https://licensebuttons.net/p/zero/1.0/88x31.png",
+      "rightsIdentifier": "CC0-1.0",
+      "rightsIdentifierScheme": "SPDX",
+      "schemeUri": "https://spdx.org/licenses/",
+      "languageCode": "en"
+    },
+    "termsOfAccess": "all files are restricted",
+    "fileAccessRequest": true,
+    "metadataBlocks": {
+      "citation": {
+        "displayName": "Citation Metadata",
+        "name": "citation",
+        "fields": [
+          {
+            "typeName": "title",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "Restricted 3"
+          },
+          {
+            "typeName": "author",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [
+              {
+                "authorName": {
+                  "typeName": "authorName",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "Cevik, Zeynep"
+                },
+                "authorAffiliation": {
+                  "typeName": "authorAffiliation",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "University of Toronto"
+                }
+              }
+            ]
+          },
+          {
+            "typeName": "datasetContact",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [
+              {
+                "datasetContactName": {
+                  "typeName": "datasetContactName",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "Cevik, Zeynep"
+                },
+                "datasetContactAffiliation": {
+                  "typeName": "datasetContactAffiliation",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "University of Toronto"
+                }
+              }
+            ]
+          },
+          {
+            "typeName": "dsDescription",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [
+              {
+                "dsDescriptionValue": {
+                  "typeName": "dsDescriptionValue",
+                  "multiple": false,
+                  "typeClass": "primitive",
+                  "value": "All files are restricted +enable access"
+                }
+              }
+            ]
+          },
+          {
+            "typeName": "subject",
+            "multiple": true,
+            "typeClass": "controlledVocabulary",
+            "value": [
+              "Social Sciences"
+            ]
+          },
+          {
+            "typeName": "depositor",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "Cevik, Zeynep"
+          },
+          {
+            "typeName": "dateOfDeposit",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "2026-05-01"
+          }
+        ]
+      }
+    },
+    "files": [
       {
-        "typeName": "title",
-        "value": "Restricted 3"
+        "label": "ExcelExample_Corr_Reg (1).tab",
+        "restricted": true,
+        "version": 1,
+        "datasetVersionId": 10389,
+        "dataFile": {
+          "id": 70226,
+          "persistentId": "",
+          "filename": "ExcelExample_Corr_Reg (1).tab",
+          "contentType": "text/tab-separated-values",
+          "friendlyType": "Tab-Delimited",
+          "filesize": 77,
+          "storageIdentifier": "s3://dataverse:19de48691c1-45c008914596",
+          "originalFileFormat": "text/csv",
+          "originalFormatLabel": "Comma Separated Values",
+          "originalFileSize": 124,
+          "originalFileName": "ExcelExample_Corr_Reg (1).csv",
+          "UNF": "UNF:6:uzG3raBPZ6Y9W95lFd13yg==",
+          "rootDataFileId": -1,
+          "md5": "b6fc755e0b28f12fd95c54fd55f67132",
+          "checksum": {
+            "type": "MD5",
+            "value": "b6fc755e0b28f12fd95c54fd55f67132"
+          },
+          "tabularData": true,
+          "creationDate": "2026-05-01",
+          "publicationDate": "2026-05-01",
+          "lastUpdateTime": "2026-05-04T18:06:26Z",
+          "fileAccessRequest": true
+        }
+      },
+      {
+        "label": "file_metadata.json",
+        "restricted": false,
+        "version": 1,
+        "datasetVersionId": 10389,
+        "dataFile": {
+          "id": 70227,
+          "persistentId": "",
+          "filename": "file_metadata.json",
+          "contentType": "application/json",
+          "friendlyType": "JSON",
+          "filesize": 5610,
+          "storageIdentifier": "s3://dataverse:19de486ac51-769cabc33994",
+          "rootDataFileId": -1,
+          "md5": "d4e209d26e6bd24c83c65dd7eb9670c6",
+          "checksum": {
+            "type": "MD5",
+            "value": "d4e209d26e6bd24c83c65dd7eb9670c6"
+          },
+          "tabularData": false,
+          "creationDate": "2026-05-01",
+          "publicationDate": "2026-05-01",
+          "lastUpdateTime": "2026-05-04T18:06:26Z",
+          "fileAccessRequest": true
+        }
+      },
+      {
+        "label": "odesi_datasetsno_borealis.png",
+        "restricted": true,
+        "version": 1,
+        "datasetVersionId": 10389,
+        "dataFile": {
+          "id": 70228,
+          "persistentId": "",
+          "filename": "odesi_datasetsno_borealis.png",
+          "contentType": "image/png",
+          "friendlyType": "PNG Image",
+          "filesize": 85286,
+          "storageIdentifier": "s3://dataverse:19de4866df2-3973210a6dc6",
+          "rootDataFileId": -1,
+          "md5": "1bbbaaa269a7bba6d48531d9edae33d7",
+          "checksum": {
+            "type": "MD5",
+            "value": "1bbbaaa269a7bba6d48531d9edae33d7"
+          },
+          "tabularData": false,
+          "creationDate": "2026-05-01",
+          "publicationDate": "2026-05-01",
+          "lastUpdateTime": "2026-05-04T18:06:26Z",
+          "fileAccessRequest": true
+        }
       }
     ]
   },
   "files": [
     {
       "label": "ExcelExample_Corr_Reg (1).tab",
-      "restricted": true,
+      "restricted": false,
       "dataFile": {
         "id": 70226,
         "filename": "ExcelExample_Corr_Reg (1).tab",
@@ -30,7 +232,7 @@
     },
     {
       "label": "odesi_datasetsno_borealis.png",
-      "restricted": true,
+      "restricted": false,
       "dataFile": {
         "id": 70228,
         "filename": "odesi_datasetsno_borealis.png",

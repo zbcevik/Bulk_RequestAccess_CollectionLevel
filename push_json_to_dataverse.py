@@ -8,6 +8,7 @@ from pathlib import Path
 
 try:
     from pyDataverse.api import NativeApi
+    import httpx
 except ImportError as exc:
     raise SystemExit(
         "pyDataverse is required. Install it with `python3 -m pip install pyDataverse`."
@@ -56,8 +57,17 @@ def update_file_access_request(native_api, file_id, new_value, use_pid=False):
     else:
         url = build_files_api_url(native_api, f"/files/{file_id}/metadata")
 
-    data = {"jsonData": json.dumps({"fileAccessRequest": new_value})}
-    return native_api.post_request(url, data=data, auth=True)
+    # Dataverse API requires multipart form-data with jsonData field
+    # Use httpx directly to send proper multipart encoding
+    files = {"jsonData": (None, json.dumps({"fileAccessRequest": new_value}))}
+    headers = {}
+    
+    # Get API token from native_api if available
+    if hasattr(native_api, 'api_token') and native_api.api_token:
+        headers["X-Dataverse-key"] = native_api.api_token
+    
+    response = httpx.post(url, files=files, headers=headers)
+    return response
 
 
 def get_response_status(response):
@@ -114,9 +124,16 @@ def push_dataset_json(native_api, json_path, dry_run=False):
             try:
                 response = push_restrict(native_api, file_id, restricted_val, use_pid=use_pid)
                 status_code = get_response_status(response)
+                response_text = get_response_text(response)
+                
                 if status_code not in (200, 201, 204):
-                    print(f"Failed restrict update for file {file_id}: {status_code} {get_response_text(response)}")
-                    error_count += 1
+                    # Check if file is already in desired state (these are not real errors)
+                    if status_code == 400 and ("already unrestricted" in str(response_text) or "already restricted" in str(response_text)):
+                        print(f"File {file_id} already {('unrestricted' if not restricted_val else 'restricted')} (no change needed)")
+                        changed_count += 1
+                    else:
+                        print(f"Failed restrict update for file {file_id}: {status_code} {response_text}")
+                        error_count += 1
                 else:
                     print(f"Updated restricted for file {file_id} to {restricted_val}")
                     changed_count += 1

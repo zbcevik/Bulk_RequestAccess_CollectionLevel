@@ -1,7 +1,16 @@
-doi,dataset_title,file_id,file_name,restricted,file_access_request
-https://doi.org/10.80240/FK2/DOAFHQ,Restricted 2,70218,Demotestmetadata.json,False,False
-https://doi.org/10.80240/FK2/DOAFHQ,Restricted 2,70222,ExcelExample_Corr_Reg (1).tab,True,False
-https://doi.org/10.80240/FK2/DOAFHQ,Restricted 2,70219,odesi_datasetsno_borealis.png,False,False
-https://doi.org/10.80240/FK2/PTJEYL,Restricted 1,70215,Demotestmetadata.json,False,True
-https://doi.org/10.80240/FK2/PTJEYL,Restricted 1,70214,ExcelExample_Corr_Reg (1).tab,True,True
-https://doi.org/10.80240/FK2/PTJEYL,Restricted 1,70213,odesi_datasetsno_borealis.png,False,True
+doi,dataset_title,file_id,file_name,restricted,file_access_request,restricted_new,file_access_request_new
+doi:10.80240/FK2/PTJEYL,Restricted 1,70215,Demotestmetadata.json,False,True,False,False
+doi:10.80240/FK2/PTJEYL,Restricted 1,70214,ExcelExample_Corr_Reg (1).tab,True,True,False,False
+doi:10.80240/FK2/PTJEYL,Restricted 1,70213,odesi_datasetsno_borealis.png,False,True,False,False
+doi:10.80240/FK2/DOAFHQ,Restricted 2,70218,Demotestmetadata.json,False,False,True,True
+doi:10.80240/FK2/DOAFHQ,Restricted 2,70222,ExcelExample_Corr_Reg (1).tab,False,False,True,True
+doi:10.80240/FK2/DOAFHQ,Restricted 2,70219,odesi_datasetsno_borealis.png,False,False,True,True
+doi:10.80240/FK2/T5XC1Y,Restricted 3,70226,ExcelExample_Corr_Reg (1).tab,True,True,False,True
+doi:10.80240/FK2/T5XC1Y,Restricted 3,70227,file_metadata.json,False,True,True,True
+doi:10.80240/FK2/T5XC1Y,Restricted 3,70228,odesi_datasetsno_borealis.png,True,True,False,True
+doi:10.80240/FK2/XCBVJ7,Restricted 4,70231,file_metadata.json,True,False,False,False
+doi:10.80240/FK2/XCBVJ7,Restricted 4,70230,odesi_datasetsno_borealis.png,True,False,False,False
+doi:10.80240/FK2/XCBVJ7,Restricted 4,70232,odesi_datasetsno_metrics.png,True,False,False,False
+doi:10.80240/FK2/6RZD0P,Restricted 5,70236,file_metadata.json,False,True,True,False
+doi:10.80240/FK2/6RZD0P,Restricted 5,70235,odesi_datasetsno_borealis.png,False,True,True,False
+doi:10.80240/FK2/6RZD0P,Restricted 5,70234,odesi_datasetsno_odesi.png,False,True,True,False
