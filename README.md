@@ -36,121 +36,124 @@ No additional repository changes are required to use these scripts locally. Afte
 
 ---
 
-## Workflow for a beginner
+## Workflows
 
-### Run everything locally on your Mac or Git Bash
+### Collection-Level Updates (4-Step Workflow)
 
-These scripts are regular Python programs. You can run them from any local folder in your Mac Terminal or Git Bash.
+This workflow allows you to export multiple datasets from a collection, edit their file metadata in a spreadsheet, and push the changes back to Borealis/Dataverse.
 
-Example from a local folder:
+#### Step 1: Export collection metadata to CSV
 
-```bash
-cd /Users/yourname/projects/Bulk_RequestAccess_CollectionLevel
-python3 json_to_csv.py export1.json export2.json -o /Users/yourname/downloads/dataset_files.csv
-```
-
-When you use an output path, the script writes files to that local location instead of only inside the repo.
-
-### Step 1: Get dataset export JSON files
-
-If you already have export JSON files (for example, `export1.json`, `export2.json`), place them in the folder where you want to run the script.
-
-If you do not have export files, use the collection export script in Step 2 to fetch them from your collection.
-
-### Optional: Fetch dataset data directly from your collection
-
-If you want to download file metadata and dataset JSON locally, use:
+Run `collection_to_csv.py` to fetch dataset file metadata directly from your Borealis/Dataverse collection:
 
 ```bash
 python3 collection_to_csv.py --server-url "https://demo.borealisdata.ca" --collection-alias "your-collection-alias" --api-key "YOUR_API_KEY" --output /Users/yourname/downloads/dataset_files.csv --save-json --json-dir /Users/yourname/downloads/dataset_jsons
 ```
 
-This saves the exported CSV and dataset JSON files to the local paths you choose.
+**What this does:**
+- Connects to your Borealis/Dataverse instance
+- Fetches all datasets in the specified collection
+- Extracts file metadata (file ID, filename, current restriction status, file access request status)
+- Exports a CSV with columns: `doi`, `dataset_title`, `file_id`, `file_name`, `restricted`, `file_access_request`
+- **Optional**: `--save-json` saves the full dataset JSON files to a local directory for reference
+- **Optional**: `--json-dir` specifies where to save the dataset JSONs (e.g., `dataset_jsons/`)
 
-### Step 2: Convert export JSON to CSV
+**Alternative**: If you already have export JSON files from Dataverse, place them in your working directory and skip to Step 3 using `update_json_from_csv.py` instead. Then use `json_to_csv.py` to convert them to CSV for inspection.
 
-If you want to inspect or edit file metadata in a spreadsheet, convert export JSON into a CSV first.
+---
 
-Run:
+#### Step 2: Edit the CSV file
 
-```bash
-python3 json_to_csv.py export1.json export2.json -o /Users/yourname/downloads/dataset_files.csv
-```
+Open the exported CSV in Excel, Google Sheets, or any spreadsheet editor.
 
-If you want to convert every `export*.json` file in the current directory, run:
+**To make changes:**
+- Find the rows for files you want to update
+- Use the `restricted_new` and `file_access_request_new` columns to specify the new values
+- Leave blank any rows you do NOT want to change
 
-```bash
-python3 json_to_csv.py -o /Users/yourname/downloads/dataset_files.csv
-```
-
-This will create the CSV at the path you choose with one row per file and these important columns:
-- `doi`
-- `dataset_title`
-- `file_id`
-- `file_name`
-- `restricted`
-- `file_access_request`
-
-
-### Step 3: Edit the CSV
-
-Open `dataset_files.csv` in Excel, Google Sheets, or another editor.
-
-To change values, use these columns:
-- `restricted_new`
-- `file_access_request_new`
-
-Only values in the `_new` columns are applied.
-
-Accepted values:
+**Accepted values:**
 - `true`, `false`
 - `yes`, `no`
 - `1`, `0`
 
-Leave other rows blank if you do not want to change them.
+**Example:**
 
+| doi | file_id | file_name | restricted | restricted_new | file_access_request | file_access_request_new |
+|-----|---------|-----------|------------|----------------|---------------------|-------------------------|
+| 10.5683/SP3/ABC123 | 12345 | data.csv | true | false | false | true |
+| 10.5683/SP3/ABC123 | 12346 | readme.pdf | false | | true | |
 
-### Step 4: Create or update JSON files from the CSV
+In this example:
+- File 12345 will be unrestricted and have file access requests enabled
+- File 12346 will not be changed (blank `_new` columns)
 
-Run:
+---
+
+#### Step 3: Generate updated dataset JSON files
+
+Run `update_json_from_csv.py` to convert your edited CSV back into dataset JSON files:
 
 ```bash
 python3 update_json_from_csv.py /Users/yourname/downloads/dataset_files.csv --json-dir /Users/yourname/downloads/dataset_jsons
 ```
 
-What this does:
-- reads `dataset_files.csv`
-- creates `dataset_jsons/` if it does not exist
-- generates or updates JSON files for each dataset
-- writes the new values from `restricted_new` and `file_access_request_new`
+**What this does:**
+- Reads the edited CSV file
+- Creates or updates the `dataset_jsons/` directory
+- Generates JSON files for each dataset with updated `restricted` and `fileAccessRequest` values
+- Preserves all existing metadata (titles, descriptions, authors, etc.)
+- Applies values from the `_new` columns only; ignores rows with blank `_new` columns
 
-If a dataset already exists in `dataset_jsons/`, it updates the matching file records.
+**Output:**
+- JSON files named like: `dataset_10.5683_SP3_ABC123.json`
+- Each file contains the full dataset structure with updated file metadata
 
+---
 
-### Step 5: Preview the changes with a dry run
+#### Step 4a: Preview changes with a dry run
 
-Before you push changes, preview them with `--dry-run`.
+Before pushing to the server, test the changes with `--dry-run`:
 
 ```bash
 python3 push_json_to_dataverse.py --server-url "https://demo.borealisdata.ca" --api-key "YOUR_API_KEY" --json-dir /Users/yourname/downloads/dataset_jsons --dry-run
 ```
 
-This will print the file updates the script would perform without modifying anything on the server.
+**What this shows:**
+- All the file updates that will be applied
+- File IDs being updated
+- New restriction and file access request values
+- Any errors or warnings
 
-If you see only the files you expect, proceed to the next step.
+If the output looks correct, proceed to Step 4b.
 
+---
 
-### Step 6: Push changes to Borealis/Dataverse
+#### Step 4b: Push changes to Borealis/Dataverse
 
-Once the dry run looks correct, run:
+Once the dry run is verified, apply the changes to the server:
 
 ```bash
 python3 push_json_to_dataverse.py --server-url "https://demo.borealisdata.ca" --api-key "YOUR_API_KEY" --json-dir /Users/yourname/downloads/dataset_jsons
 ```
 
-**Alternative: Push a single dataset interactively**
+**What this does:**
+- Connects to your Borealis/Dataverse instance
+- Updates file metadata for each file in the JSON files
+- Applies both `restricted` and `fileAccessRequest` changes
+- Provides feedback on each file (success/failure)
+- Returns a summary of all updates
 
-For testing or single dataset updates, use the interactive script:
+---
+
+### Single Dataset Update (1-Step Workflow)
+
+For testing, troubleshooting, or updating a single dataset, use `push_single_dataset.py`:
+
+```bash
+python3 push_single_dataset.py --json-path /path/to/dataset.json --server-url "https://demo.borealisdata.ca" --api-key "YOUR_API_KEY" --dry-run
+```
+
+Or run interactively:
 
 ```bash
 python3 push_single_dataset.py
@@ -161,9 +164,18 @@ This will prompt you for:
 - API Key
 - JSON file path
 
-Then it will push that specific dataset to Dataverse.
+**What this does:**
+- Takes a single dataset JSON file (generated from Step 3 or exported from Dataverse)
+- Updates file metadata directly on the server
+- Handles both `restricted` and `fileAccessRequest` updates
+- Supports the same error handling as the bulk script
+- Works with both JSON structures: `files` at top level or nested in `datasetVersion.files`
 
-This applies the changes in `dataset_jsons/` to the server.
+**Flags:**
+- `--server-url`: Dataverse server URL (can be omitted to be prompted)
+- `--api-key`: API authentication key (can be omitted to be prompted)
+- `--json-path`: Path to the dataset JSON file (can be omitted to be prompted)
+- `--dry-run`: Show what would be changed without making updates
 
 
 ## Notes and troubleshooting
@@ -191,27 +203,135 @@ This applies the changes in `dataset_jsons/` to the server.
 If you need to unrestrict files on demo.borealisdata.ca, you'll need to do it manually through the web interface.
 
 
-## Script summary
+## Script Reference
 
-### `json_to_csv.py`
-- Converts dataset export JSON files into a CSV table.
+### Collection-Level Scripts
 
-### `collection_to_csv.py`
-- Fetches metadata from a collection and writes dataset file rows to CSV.
+#### `collection_to_csv.py`
+**Purpose:** Export collection metadata to CSV and optionally save dataset JSON files locally.
 
-### `update_json_from_csv.py`
-- Reads an edited CSV and generates updated dataset JSON files.
+**Main command:**
+```bash
+python3 collection_to_csv.py --server-url URL --collection-alias ALIAS --api-key KEY --output FILE.csv --save-json --json-dir DIR/
+```
 
-### `push_json_to_dataverse.py`
-- Pushes the updated JSON file metadata back to your Borealis/Dataverse server.
-- Uses proper multipart form-data encoding for `fileAccessRequest` updates.
-- Handles "already restricted/unrestricted" responses as successes.
-- Supports both JSON structures: `files` at top level or nested in `datasetVersion.files`.
-- Supports both file restriction and access request metadata updates.
+**Key features:**
+- Fetches all datasets from a collection directly from your Borealis/Dataverse server
+- Exports file metadata as CSV with current restriction and file access request status
+- `--save-json`: Optionally downloads full dataset JSON files for reference or manual editing
+- `--json-dir`: Directory to save dataset JSONs (useful for Step 3 of the workflow)
 
-### `push_single_dataset.py`
-- Interactive script to push a single dataset JSON file to Dataverse.
-- Prompts for server URL, API key, and JSON file path.
-- Supports both JSON structures: `files` at top level or nested in `datasetVersion.files`.
-- Uses the same improved error handling and encoding as the bulk script.
-- Accepts command line arguments: `--server-url`, `--api-key`, `--json-path`, `--dry-run`.
+**Output:**
+- CSV file with columns: `doi`, `dataset_title`, `file_id`, `file_name`, `restricted`, `file_access_request`
+- Optional: Dataset JSON files in the specified directory
+
+---
+
+#### `update_json_from_csv.py`
+**Purpose:** Convert edited CSV back into dataset JSON files with updated metadata.
+
+**Main command:**
+```bash
+python3 update_json_from_csv.py CSVFILE.csv --json-dir DIR/
+```
+
+**Key features:**
+- Reads edited CSV file with `_new` columns
+- Creates or updates dataset JSON files with the changes
+- Preserves all existing metadata (titles, authors, descriptions, etc.)
+- Only applies values from `_new` columns; blank values mean no change
+- Handles multiple files in one CSV
+
+**Output:**
+- Dataset JSON files in the specified directory, ready for pushing to Dataverse
+
+---
+
+#### `push_json_to_dataverse.py`
+**Purpose:** Push all updated dataset JSON files to your Borealis/Dataverse server.
+
+**Main command:**
+```bash
+python3 push_json_to_dataverse.py --server-url URL --api-key KEY --json-dir DIR/ [--dry-run]
+```
+
+**Key features:**
+- Uses proper multipart form-data encoding for `fileAccessRequest` updates
+- Supports both JSON structures: `files` at top level or nested in `datasetVersion.files`
+- Handles "already restricted/unrestricted" responses as successes (no change needed)
+- Comprehensive error reporting and feedback
+- `--dry-run`: Test changes without modifying the server
+
+**Output:**
+- For each file: success message or error details
+- Summary: Files processed, changes applied, errors encountered
+
+---
+
+### Single Dataset Scripts
+
+#### `push_single_dataset.py`
+**Purpose:** Push a single dataset JSON file to Dataverse for testing or individual updates.
+
+**Interactive mode:**
+```bash
+python3 push_single_dataset.py
+```
+
+**Command-line mode:**
+```bash
+python3 push_single_dataset.py --server-url URL --api-key KEY --json-path FILE.json [--dry-run]
+```
+
+**Key features:**
+- Best for testing or updating individual datasets
+- Interactive prompts if arguments not provided
+- Supports both `restricted` and `fileAccessRequest` updates simultaneously
+- Same error handling and encoding as the bulk script
+- `--dry-run`: Preview changes without applying them
+
+**Arguments:**
+- `--server-url`: Dataverse server URL
+- `--api-key`: API authentication key
+- `--json-path`: Path to a single dataset JSON file
+- `--dry-run`: Show what would be changed (optional)
+
+**Output:**
+- For each file: success or error message
+- Summary: Files processed, changes applied, errors encountered
+
+---
+
+### Utility Scripts
+
+#### `json_to_csv.py`
+**Purpose:** Convert dataset export JSON files (from Dataverse) into a CSV table for inspection and editing.
+
+**Usage:**
+```bash
+python3 json_to_csv.py export1.json export2.json -o output.csv
+```
+
+or to convert all `export*.json` files:
+
+```bash
+python3 json_to_csv.py -o output.csv
+```
+
+**Key features:**
+- Takes raw Dataverse export JSON files as input
+- Extracts file metadata and converts to CSV format
+- Useful if you have pre-downloaded export JSONs instead of using `collection_to_csv.py`
+
+**Output:**
+- CSV file with columns: `doi`, `dataset_title`, `file_id`, `file_name`, `restricted`, `file_access_request`
+
+---
+
+### Legacy/Development Scripts
+
+#### `push_json_to_dataverse.py`
+Superceded by Workflow Step 4. Use this for bulk dataset updates.
+
+#### `res2json.json`, `pccfjson.json`
+Sample dataset JSON files for testing purposes.
