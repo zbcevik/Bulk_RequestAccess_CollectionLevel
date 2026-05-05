@@ -30,18 +30,15 @@ def build_files_api_url(native_api, path: str):
     return f"{native_api.base_url}/api{path}"
 
 
-def push_restrict(native_api, file_id, restricted, use_pid=False):
-    if restricted:
-        if use_pid:
-            url = build_files_api_url(native_api, f"/files/:persistentId/restrict?persistentId={file_id}")
-        else:
-            url = build_files_api_url(native_api, f"/files/{file_id}/restrict")
-    else:
-        if use_pid:
-            url = build_files_api_url(native_api, f"/files/:persistentId/unrestrict?persistentId={file_id}")
-        else:
-            url = build_files_api_url(native_api, f"/files/{file_id}/unrestrict")
-    return native_api.put_request(url, auth=True)
+def push_restrict(native_api, file_id, restricted, access_val=None, use_pid=False):
+    url = build_files_api_url(native_api, f"/files/{file_id}/restrict")
+    if use_pid:
+        url = build_files_api_url(native_api, f"/files/:persistentId/restrict?persistentId={file_id}")
+    
+    data = {"restrict": restricted}
+    if access_val is not None:
+        data["fileAccessRequest"] = access_val
+    return native_api.put_request(url, data=data, auth=True)
 
 
 def update_file_access_request(native_api, file_id, new_value, use_pid=False):
@@ -129,7 +126,7 @@ def push_dataset_json(native_api, json_path, dry_run=False):
         # Update restricted status
         if restricted_val is not None:
             try:
-                response = push_restrict(native_api, file_id, restricted_val, use_pid=use_pid)
+                response = push_restrict(native_api, file_id, restricted_val, access_val=access_val, use_pid=use_pid)
                 status_code = get_response_status(response)
                 response_text = get_response_text(response)
 
@@ -143,13 +140,15 @@ def push_dataset_json(native_api, json_path, dry_run=False):
                         error_count += 1
                 else:
                     print(f"  ✓ Updated restricted to {restricted_val}")
+                    if access_val is not None:
+                        print(f"  ✓ Updated fileAccessRequest to {access_val}")
                     changed_count += 1
             except Exception as exc:
                 print(f"  ✗ Error updating restricted: {exc}")
                 error_count += 1
 
-        # Update file access request
-        if access_val is not None:
+        # Update file access request (only if restricted not updated)
+        elif access_val is not None:
             try:
                 response = update_file_access_request(native_api, file_id, access_val, use_pid=use_pid)
                 status_code = get_response_status(response)
