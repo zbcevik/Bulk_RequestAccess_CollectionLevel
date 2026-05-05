@@ -133,7 +133,24 @@ def push_dataset_json(native_api, json_path, dry_run=False):
                 if status_code not in (200, 201, 204):
                     # Check if file is already in desired state
                     if status_code == 400 and ("already unrestricted" in str(response_text) or "already restricted" in str(response_text)):
-                        print(f"  ✓ Already {'restricted' if restricted_val else 'unrestricted'} (no change needed)")
+                        print(f"  ✓ Already {'restricted' if restricted_val else 'unrestricted'}")
+                        # Still update fileAccessRequest if needed
+                        if access_val is not None:
+                            try:
+                                response2 = update_file_access_request(native_api, file_id, access_val, use_pid=use_pid)
+                                status_code2 = get_response_status(response2)
+                                if status_code2 not in (200, 201, 204):
+                                    response_text2 = get_response_text(response2)
+                                    print(f"  ✗ Failed fileAccessRequest update: {status_code2}")
+                                    if response_text2:
+                                        print(f"     Response: {response_text2[:200]}...")
+                                    error_count += 1
+                                else:
+                                    print(f"  ✓ Updated fileAccessRequest to {access_val}")
+                                    changed_count += 1
+                            except Exception as exc:
+                                print(f"  ✗ Error updating fileAccessRequest: {exc}")
+                                error_count += 1
                         changed_count += 1
                     else:
                         print(f"  ✗ Failed restrict update: {status_code} {response_text}")
