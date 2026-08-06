@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.log
+.venv/
+.env
+*.csv
+!dataset_files.csv
