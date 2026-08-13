@@ -1,10 +1,10 @@
-# Dataverse Bulk File-Access Tools
+# Borealis/Dataverse Bulk Request Access Collection Level
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](https://www.python.org/)
 
-Python tools for reviewing and updating the `restricted` and
-`fileAccessRequest` settings of files across a Dataverse collection.
+This is a python tool for reviewing and updating the `restricted` and
+`fileAccessRequest` settings of files across a Borealis/Dataverse collection.
 
 > [!CAUTION]
 > Apply mode changes access settings on a live Dataverse server. Export and
