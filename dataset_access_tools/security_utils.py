@@ -111,7 +111,8 @@ def post_file_access_request(url, api_token, new_value):
 def put_file_restriction(url, api_token, restricted):
     """Restrict or unrestrict one file using Dataverse's boolean request body."""
     headers = {
-        "Content-Type": "text/plain",
+        # Match `curl -d true`, the format documented by Dataverse.
+        "Content-Type": "application/x-www-form-urlencoded",
         **({"X-Dataverse-key": api_token} if api_token else {}),
     }
     try:
@@ -132,8 +133,46 @@ def put_file_restriction(url, api_token, restricted):
         ) from exc
 
 
+def put_dataset_access_request(url, api_token, allowed):
+    """Allow or disallow access requests for all restricted files in a dataset."""
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        **({"X-Dataverse-key": api_token} if api_token else {}),
+    }
+    try:
+        return httpx.put(
+            url,
+            content="true" if allowed else "false",
+            headers=headers,
+            timeout=HTTP_TIMEOUT_SECONDS,
+            follow_redirects=False,
+        )
+    except httpx.TimeoutException as exc:
+        raise DataverseRequestError(
+            f"Dataverse request timed out after {HTTP_TIMEOUT_SECONDS:g} seconds."
+        ) from exc
+    except httpx.RequestError as exc:
+        raise DataverseRequestError(
+            f"Could not connect to the Dataverse server ({type(exc).__name__})."
+        ) from exc
+
+
 def response_error_summary(response):
-    """Return status information without printing a potentially sensitive body."""
+    """Return status plus a short Dataverse error message when available."""
     status_code = getattr(response, "status_code", "unknown")
     reason = getattr(response, "reason_phrase", "")
-    return f"HTTP {status_code}{f' {reason}' if reason else ''}"
+    summary = f"HTTP {status_code}{f' {reason}' if reason else ''}"
+    try:
+        payload = response.json()
+    except (ValueError, TypeError):
+        return summary
+    if isinstance(payload, dict):
+        message = payload.get("message") or payload.get("error")
+        if not message and isinstance(payload.get("data"), dict):
+            message = payload["data"].get("message")
+        if isinstance(message, str):
+            # Keep logs useful without dumping arbitrary server responses.
+            message = " ".join(message.split())[:300]
+            if message:
+                return f"{summary}: {message}"
+    return summary

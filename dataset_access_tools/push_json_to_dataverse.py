@@ -6,6 +6,7 @@ import csv
 import json
 import sys
 from pathlib import Path
+from urllib.parse import urlencode
 
 try:
     from .dataverse_json import (
@@ -13,6 +14,7 @@ try:
         find_file_record,
         get_file_records,
         get_persistent_id,
+        get_version_block,
         parse_optional_bool,
         validate_dataset,
     )
@@ -23,6 +25,7 @@ try:
         get_config_value,
         load_config,
         post_file_access_request,
+        put_dataset_access_request,
         put_file_restriction,
         response_error_summary,
         validate_server_url,
@@ -33,6 +36,7 @@ except ImportError:  # Support direct execution
         find_file_record,
         get_file_records,
         get_persistent_id,
+        get_version_block,
         parse_optional_bool,
         validate_dataset,
     )
@@ -43,6 +47,7 @@ except ImportError:  # Support direct execution
         get_config_value,
         load_config,
         post_file_access_request,
+        put_dataset_access_request,
         put_file_restriction,
         response_error_summary,
         validate_server_url,
@@ -168,6 +173,51 @@ def access_request_url(native_api, file_id):
     return f"{native_api.base_url}/api/files/{file_id}/metadata"
 
 
+def dataset_access_request_url(native_api, persistent_id):
+    query = urlencode({"persistentId": persistent_id})
+    return f"{native_api.base_url}/api/access/:persistentId/allowAccessRequest?{query}"
+
+
+def dataset_access_policies(changes, json_index):
+    """Return one dataset-wide policy for each dataset with access-request changes."""
+    affected_ids = {
+        change["doi"]
+        for change in changes
+        if change["file_access_request"] is not None
+    }
+    policies = []
+    for persistent_id in sorted(affected_ids):
+        _, data = json_index[persistent_id]
+        version = get_version_block(data) or data
+        allowed = version.get("fileAccessRequest")
+        if not isinstance(allowed, bool):
+            raise DatasetValidationError(
+                f"Dataset JSON for {persistent_id!r} has no boolean dataset-level "
+                "fileAccessRequest value. Run update_json_from_csv.py again."
+            )
+        policies.append((persistent_id, allowed))
+    return policies
+
+
+def apply_dataset_access_policy(native_api, persistent_id, allowed):
+    token = getattr(native_api, "api_token", None)
+    try:
+        response = put_dataset_access_request(
+            dataset_access_request_url(native_api, persistent_id), token, allowed
+        )
+    except DataverseRequestError as exc:
+        print(f"Error updating dataset access requests for {persistent_id}: {exc}")
+        return 0, 1
+    if response.status_code not in SUCCESS_CODES:
+        print(
+            f"Failed dataset access-request update for {persistent_id}: "
+            f"{response_error_summary(response)}"
+        )
+        return 0, 1
+    print(f"Updated dataset access requests for {persistent_id} to {allowed}")
+    return 1, 0
+
+
 def preview_change(change):
     fields = []
     if change["restricted"] is not None:
@@ -278,7 +328,9 @@ def main():
 
     try:
         changes = load_explicit_changes(changes_csv)
-        validate_changes_against_json(changes, index_json_files(json_dir))
+        json_index = index_json_files(json_dir)
+        validate_changes_against_json(changes, json_index)
+        access_policies = dataset_access_policies(changes, json_index)
     except (DatasetValidationError, OSError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
@@ -288,6 +340,8 @@ def main():
     print(f"Explicit file changes: {len(changes)}")
     for change in changes:
         preview_change(change)
+    for persistent_id, allowed in access_policies:
+        print(f"PREVIEW: dataset={persistent_id} -> allowAccessRequest={allowed}")
 
     if not args.apply:
         return 0
@@ -302,6 +356,12 @@ def main():
         change_applied, change_errors = apply_change(native_api, change)
         applied += change_applied
         errors += change_errors
+    for persistent_id, allowed in access_policies:
+        policy_applied, policy_errors = apply_dataset_access_policy(
+            native_api, persistent_id, allowed
+        )
+        applied += policy_applied
+        errors += policy_errors
     print(f"API updates applied: {applied}")
     if errors:
         print(f"Total errors: {errors}")

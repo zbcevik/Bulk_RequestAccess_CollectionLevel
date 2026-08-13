@@ -125,6 +125,28 @@ def test_process_updates_existing_json(tmp_path):
     assert saved["datasetVersion"]["files"][0]["restricted"] is True
 
 
+def test_process_saves_dataset_policy_when_file_values_already_match(tmp_path):
+    json_dir = tmp_path / "json"
+    json_dir.mkdir()
+    data = dataset("latestVersion")
+    data["latestVersion"]["files"][0]["restricted"] = True
+    data["latestVersion"]["fileAccessRequest"] = True
+    json_path = json_dir / "dataset.json"
+    json_path.write_text(json.dumps(data), encoding="utf-8")
+    csv_path = tmp_path / "updates.csv"
+    row = update_row(restricted="true", access="false")
+    data["latestVersion"]["files"][0]["dataFile"]["fileAccessRequest"] = False
+    json_path.write_text(json.dumps(data), encoding="utf-8")
+    with csv_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(row))
+        writer.writeheader()
+        writer.writerow(row)
+
+    assert process_updates(csv_path, json_dir) == (1, 0)
+    saved = json.loads(json_path.read_text(encoding="utf-8"))
+    assert saved["latestVersion"]["fileAccessRequest"] is False
+
+
 def test_process_updates_finds_dataset_by_identifier_not_filename(tmp_path):
     json_dir = tmp_path / "json"
     json_dir.mkdir()

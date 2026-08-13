@@ -7,7 +7,11 @@ import pytest
 
 from dataset_access_tools import push_json_to_dataverse
 from dataset_access_tools.dataverse_json import DatasetValidationError
-from dataset_access_tools.security_utils import post_file_access_request, put_file_restriction
+from dataset_access_tools.security_utils import (
+    post_file_access_request,
+    put_dataset_access_request,
+    put_file_restriction,
+)
 
 
 class FakeNativeApi:
@@ -18,6 +22,7 @@ class FakeNativeApi:
 def dataset(restricted=True, access_request=False):
     return {
         "persistentId": "doi:10.0000/EXAMPLE",
+        "fileAccessRequest": access_request,
         "files": [
             {
                 "restricted": restricted,
@@ -113,7 +118,7 @@ def test_restrict_request_uses_restrict_endpoint_and_true_body(monkeypatch):
     assert response.status_code == 200
     assert captured["url"].endswith("/api/files/101/restrict")
     assert captured["content"] == "true"
-    assert captured["headers"]["Content-Type"] == "text/plain"
+    assert captured["headers"]["Content-Type"] == "application/x-www-form-urlencoded"
     assert captured["headers"]["X-Dataverse-key"] == "token"
     assert captured["follow_redirects"] is False
 
@@ -131,6 +136,33 @@ def test_unrestrict_uses_same_endpoint_with_false_body(monkeypatch):
     assert captured["url"].endswith("/api/files/101/restrict")
     assert captured["content"] == "false"
     assert "/unrestrict" not in captured["url"]
+
+
+def test_dataset_access_request_uses_dataset_endpoint_and_boolean_body(monkeypatch):
+    captured = {}
+
+    def fake_put(url, **kwargs):
+        captured["url"] = url
+        captured.update(kwargs)
+        return httpx.Response(200)
+
+    monkeypatch.setattr("dataset_access_tools.security_utils.httpx.put", fake_put)
+    put_dataset_access_request(
+        "https://example.test/api/access/:persistentId/allowAccessRequest", "token", False
+    )
+    assert captured["content"] == "false"
+    assert captured["headers"]["Content-Type"] == "application/x-www-form-urlencoded"
+
+
+def test_access_policy_is_read_once_per_affected_dataset(tmp_path):
+    changes = [
+        {"doi": "doi:10.0000/EXAMPLE", "file_access_request": False},
+        {"doi": "doi:10.0000/EXAMPLE", "file_access_request": True},
+    ]
+    index = {"doi:10.0000/EXAMPLE": (tmp_path / "dataset.json", dataset())}
+    assert push_json_to_dataverse.dataset_access_policies(changes, index) == [
+        ("doi:10.0000/EXAMPLE", False)
+    ]
 
 
 def test_apply_change_sends_only_requested_field(monkeypatch):

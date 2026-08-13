@@ -93,17 +93,19 @@ def update_dataset_data(data, updates):
         changed_records += int(changed)
 
     # Dataverse also stores a dataset-wide access-request switch beside the
-    # license metadata. If any restricted file disallows access requests, that
-    # switch must be false or the dataset page can still offer Request Access.
+    # license metadata. Keep it synchronized with all currently restricted
+    # files or the dataset page can offer Request Access incorrectly.
     if pending:
-        restricted_file_disallows_requests = any(
-            record.get("restricted") is True
-            and record.get("dataFile", {}).get("fileAccessRequest") is False
-            for record in file_records
-        )
-        if restricted_file_disallows_requests:
+        restricted_records = [
+            record for record in file_records if record.get("restricted") is True
+        ]
+        if restricted_records:
+            allow_dataset_access_requests = all(
+                record.get("dataFile", {}).get("fileAccessRequest") is not False
+                for record in restricted_records
+            )
             version = get_version_block(data) or data
-            version["fileAccessRequest"] = False
+            version["fileAccessRequest"] = allow_dataset_access_requests
     return changed_records
 
 
@@ -164,11 +166,14 @@ def process_updates(csv_path, json_dir):
 
         candidate = copy.deepcopy(validate_dataset(original, expected_id=persistent_id))
         changed_files = update_dataset_data(candidate, updates)
-        if changed_files:
+        if candidate != original:
             save_dataset_json(json_path, candidate)
             updated_datasets += 1
             updated_files += changed_files
-            print(f"Updated {changed_files} file record(s) in {json_path}")
+            print(
+                f"Updated {changed_files} file record(s) and synchronized dataset "
+                f"access requests in {json_path}"
+            )
 
     return updated_datasets, updated_files
 
