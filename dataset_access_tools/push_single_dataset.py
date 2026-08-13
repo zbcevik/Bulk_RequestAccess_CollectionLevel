@@ -7,23 +7,46 @@ import sys
 from pathlib import Path
 
 try:
+    from .dataverse_json import (
+        DatasetValidationError,
+        get_file_records,
+        get_persistent_id,
+        parse_optional_bool,
+        validate_dataset,
+    )
+    from .security_utils import (
+        DataverseRequestError,
+        confirm_apply,
+        get_api_token,
+        get_config_value,
+        load_config,
+        post_file_access_request,
+        response_error_summary,
+        validate_server_url,
+    )
+except ImportError:  # Support direct execution
+    from dataverse_json import (
+        DatasetValidationError,
+        get_file_records,
+        get_persistent_id,
+        parse_optional_bool,
+        validate_dataset,
+    )
+    from security_utils import (
+        DataverseRequestError,
+        confirm_apply,
+        get_api_token,
+        get_config_value,
+        load_config,
+        post_file_access_request,
+        response_error_summary,
+        validate_server_url,
+    )
+
+try:
     from pyDataverse.api import NativeApi
-    import httpx
-except ImportError as exc:
-    raise SystemExit(
-        "Required packages not found. Install with: python3 -m pip install pyDataverse httpx"
-    ) from exc
-
-
-def parse_bool(value):
-    if value is None:
-        return None
-    text = str(value).strip().lower()
-    if text in ("true", "1", "yes"):
-        return True
-    if text in ("false", "0", "no"):
-        return False
-    return None
+except ImportError:
+    NativeApi = None
 
 
 def build_files_api_url(native_api, path: str):
@@ -31,14 +54,15 @@ def build_files_api_url(native_api, path: str):
 
 
 def push_restrict(native_api, file_id, restricted, access_val=None, use_pid=False):
-    url = build_files_api_url(native_api, f"/files/{file_id}/restrict")
+    action = "restrict" if restricted else "unrestrict"
     if use_pid:
-        url = build_files_api_url(native_api, f"/files/:persistentId/restrict?persistentId={file_id}")
-    
-    data = {"restrict": restricted}
-    if access_val is not None:
-        data["fileAccessRequest"] = access_val
-    return native_api.put_request(url, data=data, auth=True)
+        url = build_files_api_url(
+            native_api,
+            f"/files/:persistentId/{action}?persistentId={file_id}",
+        )
+    else:
+        url = build_files_api_url(native_api, f"/files/{file_id}/{action}")
+    return native_api.put_request(url, auth=True)
 
 
 def update_file_access_request(native_api, file_id, new_value, use_pid=False):
@@ -47,17 +71,11 @@ def update_file_access_request(native_api, file_id, new_value, use_pid=False):
     else:
         url = build_files_api_url(native_api, f"/files/{file_id}/metadata")
 
-    # Dataverse API requires multipart form-data with jsonData field
-    # Use httpx directly to send proper multipart encoding
-    files = {"jsonData": (None, json.dumps({"fileAccessRequest": new_value}))}
-    headers = {}
-
-    # Get API token from native_api if available
-    if hasattr(native_api, 'api_token') and native_api.api_token:
-        headers["X-Dataverse-key"] = native_api.api_token
-
-    response = httpx.post(url, files=files, headers=headers, follow_redirects=True)
-    return response
+    return post_file_access_request(
+        url,
+        getattr(native_api, "api_token", None),
+        new_value,
+    )
 
 
 def get_response_status(response):
@@ -81,12 +99,8 @@ def push_dataset_json(native_api, json_path, dry_run=False):
     with json_path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
 
-    if not isinstance(data, dict):
-        raise SystemExit(f"Invalid JSON file: {json_path}")
-
-    doi = data.get("persistentId") or data.get("identifier")
-    if not doi:
-        raise SystemExit(f"JSON file missing persistentId or identifier: {json_path}")
+    validate_dataset(data)
+    doi = get_persistent_id(data)
 
     print(f"Pushing dataset: {doi}")
 
@@ -95,7 +109,7 @@ def push_dataset_json(native_api, json_path, dry_run=False):
     file_count = 0
 
     # Handle different JSON structures: files at top level or in datasetVersion
-    files_array = data.get("files") or data.get("datasetVersion", {}).get("files", [])
+    files_array, _ = get_file_records(data)
     
     for file_record in files_array:
         file_item = file_record.get("dataFile", {})
@@ -111,11 +125,11 @@ def push_dataset_json(native_api, json_path, dry_run=False):
         print(f"Processing file {file_id} ({file_name})")
 
         use_pid = isinstance(file_id, str) and not file_id.isdigit()
-        restricted_val = parse_bool(file_record.get("restricted"))
-        access_val = parse_bool(file_item.get("fileAccessRequest"))
+        restricted_val = parse_optional_bool(file_record.get("restricted"))
+        access_val = parse_optional_bool(file_item.get("fileAccessRequest"))
 
         if restricted_val is None and access_val is None:
-            print(f"  Skipping - no changes needed")
+            print("  Skipping - no changes needed")
             continue
 
         if dry_run:
@@ -140,15 +154,13 @@ def push_dataset_json(native_api, json_path, dry_run=False):
                                 response2 = update_file_access_request(native_api, file_id, access_val, use_pid=use_pid)
                                 status_code2 = get_response_status(response2)
                                 if status_code2 not in (200, 201, 204):
-                                    response_text2 = get_response_text(response2)
                                     print(f"  ✗ Failed fileAccessRequest update: {status_code2}")
-                                    if response_text2:
-                                        print(f"     Response: {response_text2[:200]}...")
+                                    print(f"     {response_error_summary(response2)}")
                                     error_count += 1
                                 else:
                                     print(f"  ✓ Updated fileAccessRequest to {access_val}")
                                     changed_count += 1
-                            except Exception as exc:
+                            except DataverseRequestError as exc:
                                 print(f"  ✗ Error updating fileAccessRequest: {exc}")
                                 error_count += 1
                         changed_count += 1
@@ -170,18 +182,12 @@ def push_dataset_json(native_api, json_path, dry_run=False):
                 response = update_file_access_request(native_api, file_id, access_val, use_pid=use_pid)
                 status_code = get_response_status(response)
                 if status_code not in (200, 201, 204):
-                    # Print more details about the error
-                    response_text = get_response_text(response)
-                    print(f"  ✗ Failed fileAccessRequest update: {status_code}")
-                    if hasattr(response, 'headers') and 'location' in response.headers:
-                        print(f"     Redirect location: {response.headers['location']}")
-                    if response_text:
-                        print(f"     Response: {response_text[:200]}...")
+                    print(f"  ✗ Failed fileAccessRequest update: {response_error_summary(response)}")
                     error_count += 1
                 else:
                     print(f"  ✓ Updated fileAccessRequest to {access_val}")
                     changed_count += 1
-            except Exception as exc:
+            except DataverseRequestError as exc:
                 print(f"  ✗ Error updating fileAccessRequest: {exc}")
                 error_count += 1
 
@@ -206,30 +212,52 @@ def main():
         description="Push a single dataset JSON file to Dataverse."
     )
     parser.add_argument(
+        "--config",
+        default="config.ini",
+        help="INI configuration file (default: config.ini).",
+    )
+    parser.add_argument(
         "--server-url",
         help="Dataverse server URL."
     )
     parser.add_argument(
         "--api-key",
-        help="API key for authentication."
+        help="API token (discouraged: prefer config.ini or the hidden prompt)."
     )
     parser.add_argument(
         "--json-path",
         help="Path to the JSON file to push."
     )
     parser.add_argument(
-        "--dry-run",
+        "--apply",
         action="store_true",
-        help="Show what would be pushed without making changes."
+        help="Apply changes. Without this flag, the command runs in preview mode."
+    )
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Skip the APPLY prompt for automation; valid only with --apply.",
     )
     args = parser.parse_args()
+    if args.yes and not args.apply:
+        parser.error("--yes is valid only with --apply")
 
     print("=== Single Dataset JSON Push to Dataverse ===\n")
 
-    # Get inputs from arguments or prompts
-    server_url = args.server_url or prompt_for_input("Server URL", "https://demo.borealisdata.ca")
-    api_key = args.api_key or prompt_for_input("API Key")
-    json_path_str = args.json_path or prompt_for_input("JSON file path")
+    config = load_config(args.config)
+    # Command-line values override config.ini; prompts fill any missing values.
+    server_url = args.server_url or get_config_value(config, "dataverse", "server_url")
+    server_url = server_url or prompt_for_input("Server URL", "https://demo.borealisdata.ca")
+    api_key = get_api_token(
+        args.api_key,
+        get_config_value(config, "dataverse", "api_token"),
+    )
+    json_path_str = args.json_path or get_config_value(config, "files", "json_path")
+    json_path_str = json_path_str or prompt_for_input("JSON file path")
+    server_url = validate_server_url(server_url, api_key)
+    if NativeApi is None:
+        print("pyDataverse is required. Install dependencies with `python3 -m pip install -r requirements.txt`.", file=sys.stderr)
+        return 1
 
     json_path = Path(json_path_str)
     if not json_path.exists():
@@ -239,11 +267,15 @@ def main():
 
     # Initialize API client
     print(f"\nConnecting to {server_url}...")
+    print(f"Mode: {'APPLY' if args.apply else 'PREVIEW (no changes)'}")
+    if args.apply and not confirm_apply(server_url, 1, assume_yes=args.yes):
+        print("Apply cancelled; no changes were made.")
+        return 1
     native_api = NativeApi(server_url, api_token=api_key)
 
     # Push the dataset
     try:
-        changed, errors, files = push_dataset_json(native_api, json_path, dry_run=args.dry_run)
+        changed, errors, files = push_dataset_json(native_api, json_path, dry_run=not args.apply)
 
         print("\n=== Results ===")
         print(f"Files processed: {files}")
@@ -251,17 +283,19 @@ def main():
         if errors:
             print(f"Errors: {errors}")
 
-        if args.dry_run:
+        if not args.apply:
             print("🔍 DRY RUN - No actual changes made")
         elif errors == 0:
             print("✅ All updates completed successfully!")
         else:
             print("⚠️  Some updates failed. Check the output above for details.")
+            return 1
 
-    except Exception as exc:
+    except (DatasetValidationError, json.JSONDecodeError, OSError, DataverseRequestError) as exc:
         print(f"❌ Error: {exc}")
-        sys.exit(1)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

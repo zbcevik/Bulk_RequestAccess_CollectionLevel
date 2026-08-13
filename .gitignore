@@ -1,7 +1,18 @@
 __pycache__/
 *.py[cod]
 *.log
+.pytest_cache/
+.ruff_cache/
 .venv/
-.env
-*.csv
-!dataset_files.csv
+.vscode/
+*.egg-info/
+build/
+dist/
+
+# Local configuration file that may contain credentials
+config.ini
+
+# Generated workflow output
+dataset_files.csv
+dataset_jsons/*
+!dataset_jsons/.gitkeep
