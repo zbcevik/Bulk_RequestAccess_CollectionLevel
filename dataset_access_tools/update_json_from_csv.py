@@ -14,6 +14,7 @@ try:
         find_file_record,
         get_file_records,
         get_persistent_id,
+        get_version_block,
         parse_optional_bool,
         validate_dataset,
     )
@@ -24,6 +25,7 @@ except ImportError:  # Support direct execution: python dataset_access_tools/scr
         find_file_record,
         get_file_records,
         get_persistent_id,
+        get_version_block,
         parse_optional_bool,
         validate_dataset,
     )
@@ -89,6 +91,19 @@ def update_dataset_data(data, updates):
             data_file["fileAccessRequest"] = access_request
             changed = True
         changed_records += int(changed)
+
+    # Dataverse also stores a dataset-wide access-request switch beside the
+    # license metadata. If any restricted file disallows access requests, that
+    # switch must be false or the dataset page can still offer Request Access.
+    if pending:
+        restricted_file_disallows_requests = any(
+            record.get("restricted") is True
+            and record.get("dataFile", {}).get("fileAccessRequest") is False
+            for record in file_records
+        )
+        if restricted_file_disallows_requests:
+            version = get_version_block(data) or data
+            version["fileAccessRequest"] = False
     return changed_records
 
 

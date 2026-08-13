@@ -26,6 +26,20 @@ def dataset(shape="files"):
     return data
 
 
+def add_file(data, *, file_id, restricted, access_request):
+    record = {
+        "label": f"sample-{file_id}.csv",
+        "restricted": restricted,
+        "dataFile": {
+            "id": file_id,
+            "filename": f"sample-{file_id}.csv",
+            "fileAccessRequest": access_request,
+        },
+    }
+    records = data.get("files") or data.get("latestVersion", {}).get("files")
+    records.append(record)
+
+
 def update_row(file_id="101", restricted="true", access="true"):
     return {
         "doi": "doi:10.0000/EXAMPLE",
@@ -43,6 +57,40 @@ def test_updates_each_supported_shape(shape):
     records = data[shape]["files"] if shape != "files" else data["files"]
     assert records[0]["restricted"] is True
     assert records[0]["dataFile"]["fileAccessRequest"] is True
+
+
+@pytest.mark.parametrize("shape", ["files", "latestVersion", "datasetVersion"])
+def test_restricted_file_without_access_request_disables_dataset_request_access(shape):
+    data = dataset(shape)
+    version = data if shape == "files" else data[shape]
+    version["fileAccessRequest"] = True
+
+    row = update_row(restricted="true", access="false")
+    assert update_dataset_data(data, [(2, row)]) == 1
+
+    assert version["fileAccessRequest"] is False
+
+
+def test_unrestricted_file_without_access_request_does_not_disable_dataset_request_access():
+    data = dataset("latestVersion")
+    data["latestVersion"]["fileAccessRequest"] = True
+    add_file(data, file_id=202, restricted=True, access_request=True)
+
+    row = update_row(restricted="false", access="false")
+    assert update_dataset_data(data, [(2, row)]) == 0
+
+    assert data["latestVersion"]["fileAccessRequest"] is True
+
+
+def test_one_of_multiple_restricted_files_disables_dataset_request_access():
+    data = dataset("latestVersion")
+    data["latestVersion"]["fileAccessRequest"] = True
+    add_file(data, file_id=202, restricted=True, access_request=True)
+
+    row = update_row(restricted="true", access="false")
+    assert update_dataset_data(data, [(2, row)]) == 1
+
+    assert data["latestVersion"]["fileAccessRequest"] is False
 
 
 def test_missing_file_is_rejected_without_partial_update():
