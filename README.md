@@ -54,6 +54,7 @@ collection_alias = your-collection-alias
 
 [files]
 output_csv = dataset_files.csv
+changes_csv = dataset_files.csv
 json_dir = dataset_jsons
 json_path = examples/sample_updated_dataset.json
 ```
@@ -126,7 +127,10 @@ Supported file-list locations are:
 
 ### 5. Preview the server changes
 
-Preview mode is the default and performs no update requests:
+The push command reads `changes_csv` to identify explicit requests and uses the
+JSON directory only to validate them. Blank `restricted_new` and
+`file_access_request_new` cells never produce API requests. Preview mode is the
+default and performs no update requests:
 
 ```bash
 python3 dataset_access_tools/push_json_to_dataverse.py \
@@ -134,6 +138,8 @@ python3 dataset_access_tools/push_json_to_dataverse.py \
 ```
 
 The older explicit `--dry-run` spelling is also accepted by the bulk command.
+The preview must list exactly the rows you changed in the CSV. If it lists more,
+stop and do not use `--apply`.
 
 ### 6. Apply the reviewed changes
 
@@ -149,6 +155,10 @@ Apply mode prints the target server and input count, then requires you to type
 `APPLY`. For deliberate non-interactive automation, use `--apply --yes`. The
 command exits unsuccessfully if confirmation is declined, no JSON files are
 found, or any dataset/update fails.
+
+Restriction updates use Dataverse's `/api/files/{id}/restrict` endpoint with an
+explicit `true` or `false` request body. Existing JSON values are never treated
+as requested changes.
 
 ## Single-dataset workflow
 

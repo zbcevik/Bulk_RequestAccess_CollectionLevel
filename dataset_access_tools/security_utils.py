@@ -108,6 +108,30 @@ def post_file_access_request(url, api_token, new_value):
         ) from exc
 
 
+def put_file_restriction(url, api_token, restricted):
+    """Restrict or unrestrict one file using Dataverse's boolean request body."""
+    headers = {
+        "Content-Type": "text/plain",
+        **({"X-Dataverse-key": api_token} if api_token else {}),
+    }
+    try:
+        return httpx.put(
+            url,
+            content="true" if restricted else "false",
+            headers=headers,
+            timeout=HTTP_TIMEOUT_SECONDS,
+            follow_redirects=False,
+        )
+    except httpx.TimeoutException as exc:
+        raise DataverseRequestError(
+            f"Dataverse request timed out after {HTTP_TIMEOUT_SECONDS:g} seconds."
+        ) from exc
+    except httpx.RequestError as exc:
+        raise DataverseRequestError(
+            f"Could not connect to the Dataverse server ({type(exc).__name__})."
+        ) from exc
+
+
 def response_error_summary(response):
     """Return status information without printing a potentially sensitive body."""
     status_code = getattr(response, "status_code", "unknown")

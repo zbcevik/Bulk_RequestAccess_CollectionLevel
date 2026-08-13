@@ -21,6 +21,7 @@ try:
         get_config_value,
         load_config,
         post_file_access_request,
+        put_file_restriction,
         response_error_summary,
         validate_server_url,
     )
@@ -39,6 +40,7 @@ except ImportError:  # Support direct execution
         get_config_value,
         load_config,
         post_file_access_request,
+        put_file_restriction,
         response_error_summary,
         validate_server_url,
     )
@@ -54,15 +56,18 @@ def build_files_api_url(native_api, path: str):
 
 
 def push_restrict(native_api, file_id, restricted, access_val=None, use_pid=False):
-    action = "restrict" if restricted else "unrestrict"
     if use_pid:
         url = build_files_api_url(
             native_api,
-            f"/files/:persistentId/{action}?persistentId={file_id}",
+            f"/files/:persistentId/restrict?persistentId={file_id}",
         )
     else:
-        url = build_files_api_url(native_api, f"/files/{file_id}/{action}")
-    return native_api.put_request(url, auth=True)
+        url = build_files_api_url(native_api, f"/files/{file_id}/restrict")
+    return put_file_restriction(
+        url,
+        getattr(native_api, "api_token", None),
+        restricted,
+    )
 
 
 def update_file_access_request(native_api, file_id, new_value, use_pid=False):
