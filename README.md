@@ -32,11 +32,8 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-For development:
-
-```bash
-python3 -m pip install -r requirements-dev.txt
-```
+The single requirements file includes the runtime libraries and the lightweight
+test/lint tools used by this repository.
 
 ## Configuration and API-token setup
 
@@ -240,7 +237,9 @@ checks, and secret scanning.
 ## Security
 
 Do not open a public issue containing a token, credential, private dataset
-metadata, or vulnerability details. Follow [SECURITY.md](SECURITY.md).
+metadata, or vulnerability details. If a token is exposed, revoke it immediately
+and create a replacement; deleting the latest copy does not remove it from Git
+history or third-party caches.
 
 Before publishing changes, confirm that `git status` does not list
 `config.ini`, generated CSV files, dataset JSON exports, or `.DS_Store`. Keep
@@ -248,7 +247,30 @@ Gitleaks and CodeQL enabled: they detect accidentally committed credentials and
 security-sensitive code patterns; they do not replace `config.ini` and do not
 need access to its ignored local contents.
 
+For the GitHub account itself, enable two-factor authentication, review and
+delete unused personal access tokens and SSH keys, and keep the commit email set
+to GitHub's private `users.noreply.github.com` address. In the repository's
+**Settings → Security and analysis**, enable Dependabot alerts, secret scanning,
+and push protection when available. Protect `main` with a ruleset that requires
+a pull request and passing checks. A Dataverse API token is separate from the
+GitHub account: rotate it in Dataverse if it is ever exposed, then update only
+the ignored local `config.ini`.
+
+## Repository support files
+
+- `.github/` contains GitHub-only automation: tests, linting, CodeQL, Gitleaks,
+  and monthly dependency updates. It is hidden in normal macOS Finder views
+  because its name begins with a dot, but GitHub reads it automatically. It is
+  not required to run the scripts locally; it is retained to test and protect
+  changes before they reach `main`.
+- `pyproject.toml` identifies the project as an installable Python package,
+  defines its command-line entry points, Python version, dependencies, and
+  shared pytest/Ruff settings. It avoids scattering this configuration across
+  several extra files.
+- `requirements.txt` is the one-file installation list for local use and CI.
+
 ## Contributing and license
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). This project is licensed under the
-[MIT License](LICENSE).
+Use only dummy data in tests and examples, keep changes focused, and run the
+tests and lint command before opening a pull request. This project is licensed
+under the [MIT License](LICENSE).
