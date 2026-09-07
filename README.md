@@ -2,6 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](https://www.python.org/)
+[![CI](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/ci.yml/badge.svg)](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/codeql.yml/badge.svg)](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/codeql.yml)
 
 This is a python tool for reviewing and updating the `restricted` and
 `fileAccessRequest` settings of files across a Borealis/Dataverse collection.
@@ -119,6 +121,20 @@ The updater modifies existing exports only. It will not create a dataset or
 file record when the CSV does not match the JSON. Each dataset is validated
 before it is written, and writes use a temporary file followed by replacement.
 
+`file_access_request_new` is a file-by-file review field in the CSV, but
+Dataverse exposes Request Access as a dataset-wide policy. After applying the
+file rows locally, the updater synchronizes the JSON's dataset-level
+`fileAccessRequest` value:
+
+- if at least one restricted file has `fileAccessRequest: false`, dataset-level
+  Request Access becomes `false`;
+- if all restricted files allow requests, it becomes `true`;
+- unrestricted files do not affect the calculation.
+
+The dataset-level field is beside the `license` object in `latestVersion` or
+`datasetVersion`; it is not inside the license object. The updater may therefore
+report zero changed file records but one synchronized dataset.
+
 Supported file-list locations are:
 
 - `files`
@@ -127,8 +143,8 @@ Supported file-list locations are:
 
 ### 5. Preview the server changes
 
-The push command reads `changes_csv` to identify explicit requests and uses the
-JSON directory only to validate them. Blank `restricted_new` and
+The push command reads `changes_csv` to identify explicit requests and validates
+them against the JSON directory. Blank `restricted_new` and
 `file_access_request_new` cells never produce API requests. Preview mode is the
 default and performs no update requests:
 
@@ -139,7 +155,12 @@ python3 dataset_access_tools/push_json_to_dataverse.py \
 
 The older explicit `--dry-run` spelling is also accepted by the bulk command.
 The preview must list exactly the rows you changed in the CSV. If it lists more,
-stop and do not use `--apply`.
+stop and do not use `--apply`. For access-request changes it also prints one
+dataset-level line, including the numeric dataset ID, for example:
+
+```text
+PREVIEW: dataset=FK2/EXAMPLE id=12345 -> allowAccessRequest=False
+```
 
 ### 6. Apply the reviewed changes
 
@@ -157,8 +178,11 @@ command exits unsuccessfully if confirmation is declined, no JSON files are
 found, or any dataset/update fails.
 
 Restriction updates use Dataverse's `/api/files/{id}/restrict` endpoint with an
-explicit `true` or `false` request body. Existing JSON values are never treated
-as requested changes.
+explicit `true` or `false` request body. Request Access updates use
+`/api/access/{dataset-id}/allowAccessRequest`; the numeric dataset ID is read
+from the exported JSON for compatibility with installations that do not accept
+the `:persistentId` route. Request Access is sent once per affected dataset,
+not once per file. Existing JSON values are never treated as requested changes.
 
 ## Single-dataset workflow
 
@@ -192,9 +216,9 @@ Legacy-compatible utility:
 ## Output and recovery
 
 Normal output reports datasets/files processed, proposed or applied changes,
-and failures. HTTP response bodies are not printed because they may include
-sensitive server details. Direct metadata requests time out after 30 seconds
-and do not follow redirects.
+and failures. For failed API calls, only a short Dataverse error message is
+shown; arbitrary response bodies are not dumped. Direct requests time out after
+30 seconds and do not follow redirects.
 
 If local JSON was updated incorrectly, restore `dataset_jsons` from
 `dataset_jsons.backup`, correct the CSV, and regenerate the local changes. If
@@ -217,6 +241,12 @@ checks, and secret scanning.
 
 Do not open a public issue containing a token, credential, private dataset
 metadata, or vulnerability details. Follow [SECURITY.md](SECURITY.md).
+
+Before publishing changes, confirm that `git status` does not list
+`config.ini`, generated CSV files, dataset JSON exports, or `.DS_Store`. Keep
+Gitleaks and CodeQL enabled: they detect accidentally committed credentials and
+security-sensitive code patterns; they do not replace `config.ini` and do not
+need access to its ignored local contents.
 
 ## Contributing and license
 

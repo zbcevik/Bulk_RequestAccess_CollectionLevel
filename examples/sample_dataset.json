@@ -1,6 +1,8 @@
 {
+  "id": 999,
   "persistentId": "doi:10.0000/EXAMPLE",
   "title": "Example Dataset",
+  "fileAccessRequest": false,
   "files": [
     {
       "label": "sample-data.csv",

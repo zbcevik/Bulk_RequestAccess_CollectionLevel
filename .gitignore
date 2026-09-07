@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 .vscode/
+.DS_Store
 *.egg-info/
 build/
 dist/
@@ -16,3 +17,7 @@ config.ini
 dataset_files.csv
 dataset_jsons/*
 !dataset_jsons/.gitkeep
+
+# Local demo/test exports (may contain real Dataverse metadata)
+demo_restricted_files.csv
+demo_restricted_jsons/

@@ -8,7 +8,6 @@ import pytest
 from dataset_access_tools import push_json_to_dataverse
 from dataset_access_tools.dataverse_json import DatasetValidationError
 from dataset_access_tools.security_utils import (
-    post_file_access_request,
     put_dataset_access_request,
     put_file_restriction,
 )
@@ -21,6 +20,7 @@ class FakeNativeApi:
 
 def dataset(restricted=True, access_request=False):
     return {
+        "id": 777,
         "persistentId": "doi:10.0000/EXAMPLE",
         "fileAccessRequest": access_request,
         "files": [
@@ -161,8 +161,14 @@ def test_access_policy_is_read_once_per_affected_dataset(tmp_path):
     ]
     index = {"doi:10.0000/EXAMPLE": (tmp_path / "dataset.json", dataset())}
     assert push_json_to_dataverse.dataset_access_policies(changes, index) == [
-        ("doi:10.0000/EXAMPLE", False)
+        ("doi:10.0000/EXAMPLE", "777", False)
     ]
+
+
+def test_dataset_access_url_uses_numeric_dataset_id():
+    assert push_json_to_dataverse.dataset_access_request_url(FakeNativeApi(), "777") == (
+        "https://example.test/api/access/777/allowAccessRequest"
+    )
 
 
 def test_apply_change_sends_only_requested_field(monkeypatch):
@@ -172,11 +178,7 @@ def test_apply_change_sends_only_requested_field(monkeypatch):
         calls.append(("restricted", url, value))
         return httpx.Response(200)
 
-    def forbidden_access(*args, **kwargs):
-        raise AssertionError("Blank file_access_request_new must not produce an API request")
-
     monkeypatch.setattr(push_json_to_dataverse, "put_file_restriction", fake_restrict)
-    monkeypatch.setattr(push_json_to_dataverse, "post_file_access_request", forbidden_access)
     change = {
         "doi": "doi:10.0000/EXAMPLE",
         "file_id": "101",
@@ -186,6 +188,21 @@ def test_apply_change_sends_only_requested_field(monkeypatch):
     }
     assert push_json_to_dataverse.apply_change(FakeNativeApi(), change) == (1, 0)
     assert calls == [("restricted", "https://example.test/api/files/101/restrict", True)]
+
+
+def test_file_access_change_is_not_sent_to_file_metadata_endpoint(monkeypatch):
+    def forbidden_restrict(*args, **kwargs):
+        raise AssertionError("No restriction was requested")
+
+    monkeypatch.setattr(push_json_to_dataverse, "put_file_restriction", forbidden_restrict)
+    change = {
+        "doi": "doi:10.0000/EXAMPLE",
+        "file_id": "101",
+        "file_name": "sample.csv",
+        "restricted": None,
+        "file_access_request": False,
+    }
+    assert push_json_to_dataverse.apply_change(FakeNativeApi(), change) == (0, 0)
 
 
 def test_preview_never_initializes_api_client(tmp_path, monkeypatch):
@@ -213,16 +230,3 @@ def test_preview_never_initializes_api_client(tmp_path, monkeypatch):
 def test_bulk_cli_defaults_to_preview(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["push_json_to_dataverse.py"])
     assert push_json_to_dataverse.parse_args().apply is False
-
-
-def test_direct_access_request_has_timeout(monkeypatch):
-    captured = {}
-
-    def fake_post(url, **kwargs):
-        captured.update(kwargs)
-        return httpx.Response(200)
-
-    monkeypatch.setattr("dataset_access_tools.security_utils.httpx.post", fake_post)
-    post_file_access_request("https://example.test/api/files/101/metadata", "token", True)
-    assert captured["timeout"] == 30.0
-    assert captured["follow_redirects"] is False

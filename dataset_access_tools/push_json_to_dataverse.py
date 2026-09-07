@@ -6,7 +6,6 @@ import csv
 import json
 import sys
 from pathlib import Path
-from urllib.parse import urlencode
 
 try:
     from .dataverse_json import (
@@ -24,7 +23,6 @@ try:
         get_api_token,
         get_config_value,
         load_config,
-        post_file_access_request,
         put_dataset_access_request,
         put_file_restriction,
         response_error_summary,
@@ -46,7 +44,6 @@ except ImportError:  # Support direct execution
         get_api_token,
         get_config_value,
         load_config,
-        post_file_access_request,
         put_dataset_access_request,
         put_file_restriction,
         response_error_summary,
@@ -167,15 +164,21 @@ def restriction_url(native_api, file_id):
     return f"{native_api.base_url}/api/files/{file_id}/restrict"
 
 
-def access_request_url(native_api, file_id):
-    if isinstance(file_id, str) and not file_id.isdigit():
-        return f"{native_api.base_url}/api/files/:persistentId/metadata?persistentId={file_id}"
-    return f"{native_api.base_url}/api/files/{file_id}/metadata"
+def dataset_access_request_url(native_api, dataset_id):
+    return f"{native_api.base_url}/api/access/{dataset_id}/allowAccessRequest"
 
 
-def dataset_access_request_url(native_api, persistent_id):
-    query = urlencode({"persistentId": persistent_id})
-    return f"{native_api.base_url}/api/access/:persistentId/allowAccessRequest?{query}"
+def get_dataset_id(data):
+    """Return the numeric dataset ID accepted by older Dataverse installations."""
+    dataset_id = data.get("id")
+    if dataset_id is None:
+        version = get_version_block(data) or {}
+        dataset_id = version.get("datasetId")
+    if dataset_id is None or not str(dataset_id).isdigit():
+        raise DatasetValidationError(
+            "Dataset JSON has no numeric id/datasetId required for allowAccessRequest."
+        )
+    return str(dataset_id)
 
 
 def dataset_access_policies(changes, json_index):
@@ -195,15 +198,15 @@ def dataset_access_policies(changes, json_index):
                 f"Dataset JSON for {persistent_id!r} has no boolean dataset-level "
                 "fileAccessRequest value. Run update_json_from_csv.py again."
             )
-        policies.append((persistent_id, allowed))
+        policies.append((persistent_id, get_dataset_id(data), allowed))
     return policies
 
 
-def apply_dataset_access_policy(native_api, persistent_id, allowed):
+def apply_dataset_access_policy(native_api, persistent_id, dataset_id, allowed):
     token = getattr(native_api, "api_token", None)
     try:
         response = put_dataset_access_request(
-            dataset_access_request_url(native_api, persistent_id), token, allowed
+            dataset_access_request_url(native_api, dataset_id), token, allowed
         )
     except DataverseRequestError as exc:
         print(f"Error updating dataset access requests for {persistent_id}: {exc}")
@@ -254,26 +257,6 @@ def apply_change(native_api, change):
             print(f"Error updating restricted for file {file_id}: {exc}")
             errors += 1
 
-    if change["file_access_request"] is not None:
-        try:
-            response = post_file_access_request(
-                access_request_url(native_api, file_id), token, change["file_access_request"]
-            )
-            if response.status_code not in SUCCESS_CODES:
-                print(
-                    f"Failed fileAccessRequest update for file {file_id}: "
-                    f"{response_error_summary(response)}"
-                )
-                errors += 1
-            else:
-                print(
-                    f"Updated fileAccessRequest for file {file_id} "
-                    f"to {change['file_access_request']}"
-                )
-                applied += 1
-        except DataverseRequestError as exc:
-            print(f"Error updating fileAccessRequest for file {file_id}: {exc}")
-            errors += 1
     return applied, errors
 
 
@@ -340,8 +323,11 @@ def main():
     print(f"Explicit file changes: {len(changes)}")
     for change in changes:
         preview_change(change)
-    for persistent_id, allowed in access_policies:
-        print(f"PREVIEW: dataset={persistent_id} -> allowAccessRequest={allowed}")
+    for persistent_id, dataset_id, allowed in access_policies:
+        print(
+            f"PREVIEW: dataset={persistent_id} id={dataset_id} "
+            f"-> allowAccessRequest={allowed}"
+        )
 
     if not args.apply:
         return 0
@@ -356,9 +342,9 @@ def main():
         change_applied, change_errors = apply_change(native_api, change)
         applied += change_applied
         errors += change_errors
-    for persistent_id, allowed in access_policies:
+    for persistent_id, dataset_id, allowed in access_policies:
         policy_applied, policy_errors = apply_dataset_access_policy(
-            native_api, persistent_id, allowed
+            native_api, persistent_id, dataset_id, allowed
         )
         applied += policy_applied
         errors += policy_errors
