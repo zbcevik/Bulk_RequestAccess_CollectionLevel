@@ -165,6 +165,48 @@ def test_access_policy_is_read_once_per_affected_dataset(tmp_path):
     ]
 
 
+def test_access_policy_allows_json_without_numeric_dataset_id(tmp_path):
+    data = dataset()
+    del data["id"]
+    changes = [{"doi": "doi:10.0000/EXAMPLE", "file_access_request": False}]
+    index = {"doi:10.0000/EXAMPLE": (tmp_path / "dataset.json", data)}
+    assert push_json_to_dataverse.dataset_access_policies(changes, index) == [
+        ("doi:10.0000/EXAMPLE", None, False)
+    ]
+
+
+def test_missing_dataset_id_is_resolved_from_doi(monkeypatch):
+    class LookupApi(FakeNativeApi):
+        def get_dataset(self, persistent_id, is_pid=False):
+            assert persistent_id == "doi:10.0000/EXAMPLE"
+            assert is_pid is True
+            return {"status": "OK", "data": {"id": 888}}
+
+    calls = []
+
+    def fake_update(url, token, allowed):
+        calls.append((url, token, allowed))
+        return httpx.Response(200)
+
+    monkeypatch.setattr(push_json_to_dataverse, "put_dataset_access_request", fake_update)
+    assert push_json_to_dataverse.apply_dataset_access_policy(
+        LookupApi(), "doi:10.0000/EXAMPLE", None, False
+    ) == (1, 0)
+    assert calls == [
+        ("https://example.test/api/access/888/allowAccessRequest", "placeholder", False)
+    ]
+
+
+def test_dataset_id_lookup_accepts_dataset_id_in_version():
+    class LookupApi(FakeNativeApi):
+        def get_dataset(self, persistent_id, is_pid=False):
+            return {"data": {"latestVersion": {"datasetId": 889}}}
+
+    assert push_json_to_dataverse.resolve_dataset_id(
+        LookupApi(), "doi:10.0000/EXAMPLE"
+    ) == "889"
+
+
 def test_dataset_access_url_uses_numeric_dataset_id():
     assert push_json_to_dataverse.dataset_access_request_url(FakeNativeApi(), "777") == (
         "https://example.test/api/access/777/allowAccessRequest"

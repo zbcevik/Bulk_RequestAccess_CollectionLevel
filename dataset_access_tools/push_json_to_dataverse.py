@@ -169,16 +169,52 @@ def dataset_access_request_url(native_api, dataset_id):
 
 
 def get_dataset_id(data):
-    """Return the numeric dataset ID accepted by older Dataverse installations."""
+    """Return a numeric dataset ID when the export contains one."""
     dataset_id = data.get("id")
     if dataset_id is None:
         version = get_version_block(data) or {}
         dataset_id = version.get("datasetId")
-    if dataset_id is None or not str(dataset_id).isdigit():
+    if dataset_id is None:
+        return None
+    if not str(dataset_id).isdigit():
         raise DatasetValidationError(
-            "Dataset JSON has no numeric id/datasetId required for allowAccessRequest."
+            f"Dataset JSON has a nonnumeric id/datasetId value: {dataset_id!r}."
         )
     return str(dataset_id)
+
+
+def resolve_dataset_id(native_api, persistent_id):
+    """Look up a missing numeric dataset ID through its persistent identifier."""
+    try:
+        response = native_api.get_dataset(persistent_id, is_pid=True)
+    except Exception as exc:
+        raise DataverseRequestError(
+            f"Could not look up the numeric dataset ID for {persistent_id}."
+        ) from exc
+
+    status_code = getattr(response, "status_code", 200)
+    if status_code not in SUCCESS_CODES:
+        raise DataverseRequestError(
+            f"Dataset ID lookup for {persistent_id} failed: {response_error_summary(response)}"
+        )
+    try:
+        payload = response.json() if hasattr(response, "json") else response
+    except (ValueError, TypeError) as exc:
+        raise DataverseRequestError(
+            f"Dataset ID lookup for {persistent_id} returned invalid JSON."
+        ) from exc
+    if isinstance(payload, dict) and isinstance(payload.get("data"), dict):
+        payload = payload["data"]
+    if not isinstance(payload, dict):
+        raise DataverseRequestError(
+            f"Dataset ID lookup for {persistent_id} returned an invalid response."
+        )
+    dataset_id = get_dataset_id(payload)
+    if dataset_id is None:
+        raise DataverseRequestError(
+            f"Dataverse returned no numeric dataset ID for {persistent_id}."
+        )
+    return dataset_id
 
 
 def dataset_access_policies(changes, json_index):
@@ -205,6 +241,9 @@ def dataset_access_policies(changes, json_index):
 def apply_dataset_access_policy(native_api, persistent_id, dataset_id, allowed):
     token = getattr(native_api, "api_token", None)
     try:
+        if dataset_id is None:
+            dataset_id = resolve_dataset_id(native_api, persistent_id)
+            print(f"Resolved dataset {persistent_id} to numeric ID {dataset_id}")
         response = put_dataset_access_request(
             dataset_access_request_url(native_api, dataset_id), token, allowed
         )
@@ -324,8 +363,9 @@ def main():
     for change in changes:
         preview_change(change)
     for persistent_id, dataset_id, allowed in access_policies:
+        id_description = dataset_id or "lookup by DOI during apply"
         print(
-            f"PREVIEW: dataset={persistent_id} id={dataset_id} "
+            f"PREVIEW: dataset={persistent_id} id={id_description} "
             f"-> allowAccessRequest={allowed}"
         )
 

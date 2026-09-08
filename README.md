@@ -178,8 +178,12 @@ Restriction updates use Dataverse's `/api/files/{id}/restrict` endpoint with an
 explicit `true` or `false` request body. Request Access updates use
 `/api/access/{dataset-id}/allowAccessRequest`; the numeric dataset ID is read
 from the exported JSON for compatibility with installations that do not accept
-the `:persistentId` route. Request Access is sent once per affected dataset,
-not once per file. Existing JSON values are never treated as requested changes.
+the `:persistentId` route. If an older or simplified JSON export has a DOI but
+no numeric `id` or `datasetId`, apply mode performs a read-only DOI lookup and
+then uses the returned numeric ID. Preview mode reports that the lookup is
+pending but makes no network request. Request Access is sent once per affected
+dataset, not once per file. Existing JSON values are never treated as requested
+changes.
 
 ## Single-dataset workflow
 
