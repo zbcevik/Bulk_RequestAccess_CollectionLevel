@@ -9,9 +9,8 @@ This is a python tool for reviewing and updating the `restricted` and
 `fileAccessRequest` settings of files across a Borealis/Dataverse collection.
 
 > [!CAUTION]
-> Apply mode changes access settings on a live Dataverse server. Export and
-> back up the source JSON, review the generated CSV, run preview mode, and test
-> against a non-production Dataverse instance before using `--apply`.
+> Review the generated CSV, run preview mode, and test
+> against demo.borealisdata.ca before using `--apply`.
 
 ## Supported environment
 
@@ -150,7 +149,6 @@ python3 dataset_access_tools/push_json_to_dataverse.py \
   --config config.ini
 ```
 
-The older explicit `--dry-run` spelling is also accepted by the bulk command.
 The preview must list exactly the rows you changed in the CSV. If it lists more,
 stop and do not use `--apply`. For access-request changes it also prints one
 dataset-level line, including the numeric dataset ID, for example:
@@ -234,8 +232,7 @@ python3 -m pytest
 python3 -m ruff check .
 ```
 
-Tests use dummy data and mocked HTTP calls; they must never connect to a live
-Dataverse server. GitHub Actions runs tests, linting, CodeQL, dependency update
+Tests use dummy data and mocked HTTP calls; they must never connect to a borealisdata.ca. GitHub Actions runs tests, linting, CodeQL, dependency update
 checks, and secret scanning.
 
 ## Security
@@ -253,12 +250,7 @@ need access to its ignored local contents.
 
 For the GitHub account itself, enable two-factor authentication, review and
 delete unused personal access tokens and SSH keys, and keep the commit email set
-to GitHub's private `users.noreply.github.com` address. In the repository's
-**Settings → Security and analysis**, enable Dependabot alerts, secret scanning,
-and push protection when available. Protect `main` with a ruleset that requires
-a pull request and passing checks. A Dataverse API token is separate from the
-GitHub account: rotate it in Dataverse if it is ever exposed, then update only
-the ignored local `config.ini`.
+to GitHub's private `users.noreply.github.com` address. 
 
 ## Repository support files
 
@@ -273,8 +265,6 @@ the ignored local `config.ini`.
   several extra files.
 - `requirements.txt` is the one-file installation list for local use and CI.
 
-## Contributing and license
+## License
 
-Use only dummy data in tests and examples, keep changes focused, and run the
-tests and lint command before opening a pull request. This project is licensed
-under the [MIT License](LICENSE).
+[MIT License](LICENSE).
