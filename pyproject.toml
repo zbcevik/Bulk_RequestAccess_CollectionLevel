@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dataverse-bulk-access-tools"
+version = "0.1.0"
+description = "Review and update Dataverse file-access settings in bulk"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{name = "Zeynep Cevik"}]
+dependencies = [
+  "httpx>=0.28,<1",
+  "pyDataverse>=0.2,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<10",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+dataverse-collection-to-csv = "dataset_access_tools.collection_to_csv:main"
+dataverse-json-folder-to-csv = "dataset_access_tools.json_folder_to_csv:main"
+dataverse-update-json = "dataset_access_tools.update_json_from_csv:main"
+dataverse-push-json = "dataset_access_tools.push_json_to_dataverse:main"
+dataverse-push-single = "dataset_access_tools.push_single_dataset:main"
+
+[tool.setuptools]
+packages = ["dataset_access_tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

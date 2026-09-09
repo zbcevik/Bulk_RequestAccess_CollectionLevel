@@ -1,7 +1,23 @@
 __pycache__/
 *.py[cod]
 *.log
+.pytest_cache/
+.ruff_cache/
 .venv/
-.env
-*.csv
-!dataset_files.csv
+.vscode/
+.DS_Store
+*.egg-info/
+build/
+dist/
+
+# Local configuration file that may contain credentials
+config.ini
+
+# Generated workflow output
+dataset_files.csv
+dataset_jsons/*
+!dataset_jsons/.gitkeep
+
+# Local demo/test exports (may contain real Dataverse metadata)
+demo_restricted_files.csv
+demo_restricted_jsons/

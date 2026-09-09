@@ -1,101 +1,48 @@
+#!/usr/bin/env python3
+"""Legacy-compatible converter for explicitly named Dataverse JSON files."""
+
 import argparse
 import csv
-import glob
 import json
+import sys
 from pathlib import Path
 
-
-def extract_title(dataset_version):
-    citation_block = dataset_version.get("metadataBlocks", {}).get("citation", {})
-    fields = citation_block.get("fields", [])
-    for field in fields:
-        if field.get("typeName") == "title":
-            value = field.get("value")
-            if isinstance(value, str):
-                return value
-    return None
+try:
+    from .dataverse_json import CSV_FIELDNAMES, DatasetValidationError, dataset_to_rows
+except ImportError:  # Support direct execution
+    from dataverse_json import CSV_FIELDNAMES, DatasetValidationError, dataset_to_rows
 
 
-def extract_doi(dataset):
-    doi = dataset.get("persistentUrl") or dataset.get("identifier")
-    if doi and doi.startswith("https://doi.org/"):
-        return doi
-    return doi
-
-
-def parse_dataset_file(dataset):
-    doi = extract_doi(dataset) or ""
-    version = dataset.get("datasetVersion", {})
-    title = extract_title(version) or dataset.get("title") or ""
-    file_access_request_dataset = version.get("fileAccessRequest")
-
-    # Support file lists at the root or nested inside datasetVersion.
-    file_records = dataset.get("files") or version.get("files") or []
-
+def convert_files(json_paths, output_path):
     rows = []
-    for file_record in file_records:
-        file_item = file_record.get("dataFile", {})
-        file_id = file_item.get("id")
-        file_name = file_item.get("filename")
-        restricted = file_record.get("restricted")
-        file_access_request = file_item.get("fileAccessRequest")
-        if file_access_request is None:
-            file_access_request = file_access_request_dataset
-
-        rows.append({
-            "doi": doi,
-            "dataset_title": title,
-            "file_id": file_id,
-            "file_name": file_name,
-            "restricted": bool(restricted),
-            "file_access_request": bool(file_access_request),
-        })
-
-    return rows
-
-
-def load_json_file(path):
-    with open(path, "r", encoding="utf-8") as handle:
-        return json.load(handle)
+    for path in json_paths:
+        with path.open(encoding="utf-8") as handle:
+            rows.extend(dataset_to_rows(json.load(handle)))
+    if not rows:
+        raise DatasetValidationError("The supplied dataset exports contain no file records.")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=CSV_FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(rows)
+    return len(rows)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert dataset export JSON files into a CSV of file rows with DOI, title, and access flags."
+        description="Convert explicitly named Dataverse JSON exports to an editable CSV."
     )
-    parser.add_argument(
-        "json_files",
-        nargs="*",
-        help="JSON files to process. If omitted, all export*.json files in the current folder are used.",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        default="dataset_files.csv",
-        help="Output CSV file name.",
-    )
+    parser.add_argument("json_files", nargs="+", help="Dataset JSON files to process.")
+    parser.add_argument("-o", "--output", default="dataset_files.csv")
     args = parser.parse_args()
-
-    json_paths = args.json_files or sorted(glob.glob("export*.json"))
-    if not json_paths:
-        raise SystemExit("No JSON files found to process. Provide filenames or place export*.json files in the folder.")
-
-    all_rows = []
-    for json_path in json_paths:
-        dataset = load_json_file(json_path)
-        all_rows.extend(parse_dataset_file(dataset))
-
-    fieldnames = ["doi", "dataset_title", "file_id", "file_name", "restricted", "file_access_request"]
-    output_path = Path(args.output)
-    if output_path.parent and output_path.parent != Path(""):
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(all_rows)
-
-    print(f"Wrote {len(all_rows)} rows to {output_path}")
+    try:
+        rows = convert_files([Path(path) for path in args.json_files], Path(args.output))
+    except (OSError, json.JSONDecodeError, DatasetValidationError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    print(f"Wrote {rows} row(s) to {args.output}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

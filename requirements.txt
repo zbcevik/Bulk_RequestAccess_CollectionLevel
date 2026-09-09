@@ -1,2 +1,4 @@
-pyDataverse>=0.2.0
-httpx>=0.28.0
+httpx>=0.28,<1
+pyDataverse>=0.2,<1
+pytest>=8,<10
+ruff>=0.12,<1

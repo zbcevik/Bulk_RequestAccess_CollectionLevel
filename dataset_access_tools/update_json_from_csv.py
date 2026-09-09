@@ -1,171 +1,221 @@
 #!/usr/bin/env python3
-"""Update dataset JSON files with new restricted and file access request values from CSV."""
+"""Apply reviewed CSV access changes to existing Dataverse dataset JSON files."""
 
 import argparse
+import copy
 import csv
 import json
 import sys
 from pathlib import Path
 
+try:
+    from .dataverse_json import (
+        DatasetValidationError,
+        find_file_record,
+        get_file_records,
+        get_persistent_id,
+        get_version_block,
+        parse_optional_bool,
+        validate_dataset,
+    )
+    from .security_utils import get_config_value, load_config
+except ImportError:  # Support direct execution: python dataset_access_tools/script.py
+    from dataverse_json import (
+        DatasetValidationError,
+        find_file_record,
+        get_file_records,
+        get_persistent_id,
+        get_version_block,
+        parse_optional_bool,
+        validate_dataset,
+    )
+    from security_utils import get_config_value, load_config
 
-def parse_bool(value):
-    if value is None:
-        return None
-    value = str(value).strip().lower()
-    if value in ('true', '1', 'yes'):
-        return True
-    if value in ('false', '0', 'no'):
-        return False
-    return None
+
+REQUIRED_COLUMNS = {
+    "doi",
+    "file_id",
+    "file_name",
+    "restricted_new",
+    "file_access_request_new",
+}
 
 
-def sanitize_filename(doi):
-    safe = doi.replace('doi:', '').replace('/', '_').replace(':', '_')
+def sanitize_filename(persistent_id):
+    safe = persistent_id.replace("doi:", "").replace("/", "_").replace(":", "_")
     return f"dataset_{safe}.json"
 
 
 def load_csv(csv_path):
-    """Load CSV and return list of dicts."""
-    with csv_path.open('r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        return [row for row in reader]
-
-
-def ensure_json_dir(json_dir):
-    if not json_dir.exists():
-        json_dir.mkdir(parents=True, exist_ok=True)
-        print(f"Created JSON directory: {json_dir}")
-
-
-def find_file_record(data, file_id, filename):
-    for file_record in data.get('files', []):
-        file_item = file_record.get('dataFile', {})
-        if str(file_item.get('id')) == str(file_id):
-            return file_record
-        if file_item.get('filename') == filename:
-            return file_record
-        if file_record.get('label') == filename:
-            return file_record
-    return None
-
-
-def create_file_record(row):
-    return {
-        'label': row.get('file_name', ''),
-        'restricted': parse_bool(row.get('restricted')) or False,
-        'dataFile': {
-            'id': int(row['file_id']) if row.get('file_id') else None,
-            'filename': row.get('file_name', ''),
-            'fileAccessRequest': parse_bool(row.get('file_access_request')) or False,
-        },
-    }
+    with csv_path.open("r", newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        columns = set(reader.fieldnames or [])
+        missing = sorted(REQUIRED_COLUMNS - columns)
+        if missing:
+            raise DatasetValidationError(
+                f"CSV is missing required column(s): {', '.join(missing)}."
+            )
+        return list(reader)
 
 
 def update_dataset_data(data, updates):
-    if 'files' not in data:
-        data['files'] = []
+    """Apply validated rows atomically and return the changed record count."""
+    file_records, _ = get_file_records(data)
+    pending = []
 
-    changed = False
-    for row in updates:
-        file_id = row.get('file_id')
+    for row_number, row in updates:
+        file_id = str(row.get("file_id", "")).strip()
         if not file_id:
+            raise DatasetValidationError(f"CSV row {row_number} has no file_id.")
+
+        restricted = parse_optional_bool(row.get("restricted_new"))
+        access_request = parse_optional_bool(row.get("file_access_request_new"))
+        if restricted is None and access_request is None:
             continue
 
-        file_record = find_file_record(data, file_id, row.get('file_name'))
-        if file_record is None:
-            file_record = create_file_record(row)
-            data['files'].append(file_record)
+        record = find_file_record(file_records, file_id, row.get("file_name", ""))
+        if record is None:
+            raise DatasetValidationError(
+                f"CSV row {row_number} references file {file_id!r}, which is not in the dataset JSON."
+            )
+        pending.append((record, restricted, access_request))
+
+    changed_records = 0
+    for record, restricted, access_request in pending:
+        changed = False
+        data_file = record.setdefault("dataFile", {})
+        if restricted is not None and record.get("restricted") != restricted:
+            record["restricted"] = restricted
             changed = True
-
-        file_item = file_record.setdefault('dataFile', {})
-        file_item.setdefault('id', int(file_id) if file_id else None)
-        file_item.setdefault('filename', row.get('file_name', ''))
-
-        new_restricted = parse_bool(row.get('restricted_new'))
-        if new_restricted is not None and file_record.get('restricted') != new_restricted:
-            file_record['restricted'] = new_restricted
+        if access_request is not None and data_file.get("fileAccessRequest") != access_request:
+            data_file["fileAccessRequest"] = access_request
             changed = True
+        changed_records += int(changed)
 
-        new_access_request = parse_bool(row.get('file_access_request_new'))
-        if new_access_request is not None and file_item.get('fileAccessRequest') != new_access_request:
-            file_item['fileAccessRequest'] = new_access_request
-            changed = True
-
-    return changed
+    # Dataverse also stores a dataset-wide access-request switch beside the
+    # license metadata. Keep it synchronized with all currently restricted
+    # files or the dataset page can offer Request Access incorrectly.
+    if pending:
+        restricted_records = [
+            record for record in file_records if record.get("restricted") is True
+        ]
+        if restricted_records:
+            allow_dataset_access_requests = all(
+                record.get("dataFile", {}).get("fileAccessRequest") is not False
+                for record in restricted_records
+            )
+            version = get_version_block(data) or data
+            version["fileAccessRequest"] = allow_dataset_access_requests
+    return changed_records
 
 
 def save_dataset_json(json_path, data):
-    with json_path.open('w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-    print(f"Saved {json_path}")
+    temporary_path = json_path.with_suffix(json_path.suffix + ".tmp")
+    with temporary_path.open("w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2)
+        handle.write("\n")
+    temporary_path.replace(json_path)
+
+
+def index_dataset_jsons(json_dir):
+    """Index existing exports by identifier without relying on a filename convention."""
+    indexed = {}
+    json_paths = sorted(json_dir.glob("*.json"))
+    if not json_paths:
+        raise DatasetValidationError(f"No dataset JSON files found in {json_dir}.")
+
+    for json_path in json_paths:
+        try:
+            with json_path.open(encoding="utf-8") as handle:
+                data = validate_dataset(json.load(handle))
+        except json.JSONDecodeError as exc:
+            raise DatasetValidationError(f"Invalid JSON in {json_path}: {exc}.") from exc
+        persistent_id = get_persistent_id(data)
+        if persistent_id in indexed:
+            raise DatasetValidationError(
+                f"Duplicate dataset identifier {persistent_id!r} in "
+                f"{indexed[persistent_id][0]} and {json_path}."
+            )
+        indexed[persistent_id] = (json_path, data)
+    return indexed
+
+
+def process_updates(csv_path, json_dir):
+    rows = load_csv(csv_path)
+    dataset_index = index_dataset_jsons(json_dir)
+    updates_by_id = {}
+    for row_number, row in enumerate(rows, start=2):
+        persistent_id = str(row.get("doi", "")).strip()
+        if not persistent_id:
+            raise DatasetValidationError(f"CSV row {row_number} has no DOI/persistent identifier.")
+        updates_by_id.setdefault(persistent_id, []).append((row_number, row))
+
+    if not updates_by_id:
+        raise DatasetValidationError("CSV contains no dataset rows.")
+
+    updated_datasets = 0
+    updated_files = 0
+    for persistent_id, updates in updates_by_id.items():
+        indexed_dataset = dataset_index.get(persistent_id)
+        if indexed_dataset is None:
+            raise DatasetValidationError(
+                f"Dataset JSON not found for {persistent_id!r} in {json_dir}. "
+                "This tool updates existing exports and will not create missing datasets."
+            )
+        json_path, original = indexed_dataset
+
+        candidate = copy.deepcopy(validate_dataset(original, expected_id=persistent_id))
+        changed_files = update_dataset_data(candidate, updates)
+        if candidate != original:
+            save_dataset_json(json_path, candidate)
+            updated_datasets += 1
+            updated_files += changed_files
+            print(
+                f"Updated {changed_files} file record(s) and synchronized dataset "
+                f"access requests in {json_path}"
+            )
+
+    return updated_datasets, updated_files
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Apply reviewed CSV access values to existing dataset JSON exports."
+    )
+    parser.add_argument(
+        "--config",
+        default="config.ini",
+        help="INI configuration file (default: config.ini).",
+    )
+    parser.add_argument("csv_file", help="CSV file containing reviewed access values.")
+    parser.add_argument(
+        "--json-dir",
+        default=None,
+        help="Directory containing existing dataset JSON exports.",
+    )
+    return parser.parse_args()
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Update dataset JSON files with new values from CSV."
-    )
-    parser.add_argument(
-        'csv_file',
-        help='Path to the CSV file with updated values.'
-    )
-    parser.add_argument(
-        '--json-dir',
-        default='dataset_jsons',
-        help='Directory containing dataset JSON files or where new JSONs will be created.'
-    )
-    args = parser.parse_args()
-
+    args = parse_args()
+    config = load_config(args.config)
+    args.json_dir = args.json_dir or get_config_value(config, "files", "json_dir", "dataset_jsons")
     csv_path = Path(args.csv_file)
     json_dir = Path(args.json_dir)
-
-    if not csv_path.exists():
+    if not csv_path.is_file():
         sys.exit(f"CSV file not found: {csv_path}")
+    if not json_dir.is_dir():
+        sys.exit(f"JSON directory not found: {json_dir}")
 
-    ensure_json_dir(json_dir)
+    try:
+        datasets, files = process_updates(csv_path, json_dir)
+    except (DatasetValidationError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
 
-    rows = load_csv(csv_path)
-    print(f"Loaded {len(rows)} rows from CSV")
-
-    updates_by_doi = {}
-    titles_by_doi = {}
-    for row in rows:
-        doi = row.get('doi', '').strip()
-        if not doi:
-            continue
-        updates_by_doi.setdefault(doi, []).append(row)
-        titles_by_doi.setdefault(doi, row.get('dataset_title', '').strip())
-
-    updated_count = 0
-    created_count = 0
-
-    for doi, updates in updates_by_doi.items():
-        json_filename = sanitize_filename(doi)
-        json_path = json_dir / json_filename
-
-        if json_path.exists():
-            try:
-                with json_path.open('r', encoding='utf-8') as f:
-                    data = json.load(f)
-            except Exception as exc:
-                print(f"Error reading {json_path}: {exc}")
-                continue
-        else:
-            data = {
-                'persistentId': doi,
-                'title': titles_by_doi.get(doi, ''),
-                'citation': {'fields': [{'typeName': 'title', 'value': titles_by_doi.get(doi, '')}]},
-                'files': [],
-            }
-            created_count += 1
-            print(f"Creating new dataset JSON for {doi}: {json_path}")
-
-        if update_dataset_data(data, updates):
-            save_dataset_json(json_path, data)
-            updated_count += 1
-
-    print(f"Created {created_count} dataset JSON files")
-    print(f"Updated {updated_count} dataset JSON files")
+    print(f"Updated {files} file record(s) across {datasets} dataset(s)")
+    return 0
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())

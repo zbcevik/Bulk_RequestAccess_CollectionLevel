@@ -1,0 +1,26 @@
+{
+  "id": 999,
+  "persistentId": "doi:10.0000/EXAMPLE",
+  "title": "Example Dataset",
+  "fileAccessRequest": true,
+  "files": [
+    {
+      "label": "sample-data.csv",
+      "restricted": true,
+      "dataFile": {
+        "id": 1001,
+        "filename": "sample-data.csv",
+        "fileAccessRequest": true
+      }
+    },
+    {
+      "label": "sample-documentation.txt",
+      "restricted": true,
+      "dataFile": {
+        "id": 1002,
+        "filename": "sample-documentation.txt",
+        "fileAccessRequest": true
+      }
+    }
+  ]
+}
