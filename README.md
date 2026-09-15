@@ -2,8 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](https://www.python.org/)
-[![CI](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/ci.yml/badge.svg)](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/codeql.yml/badge.svg)](https://github.com/zbcevik/Bulk_RequestAccess_CollectionLevel/actions/workflows/codeql.yml)
 
 This is a python tool for reviewing and updating the `restricted` and
 `fileAccessRequest` settings of files across a Borealis/Dataverse collection.
@@ -14,7 +12,7 @@ This is a python tool for reviewing and updating the `restricted` and
 
 ## Supported environment
 
-- Python 3.9 through 3.13 (covered by the repository CI matrix)
+- Python 3.9 through 3.13
 - A Dataverse-compatible API and an account permitted to read the collection
   and change file restrictions and access-request settings
 - HTTPS for authenticated remote servers; HTTP is accepted only for localhost
@@ -25,14 +23,20 @@ your institution's test or demo server before production use.
 
 ## Installation
 
+Download or clone this repository, then open a terminal in its root folder.
+Run the following commands to create a virtual environment and install the
+required libraries:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-The single requirements file includes the runtime libraries and the lightweight
-test/lint tools used by this repository.
+The requirements file contains the runtime libraries `httpx` and `pyDataverse`.
+Run the scripts directly with `python3`, as shown below, from the repository
+root with the virtual environment activated. For a new terminal session, run
+`source .venv/bin/activate` again before using the scripts.
 
 ## Configuration and API-token setup
 
@@ -225,16 +229,6 @@ incorrect settings were already applied to the server, restore the desired
 values in the CSV/JSON, preview again, and apply a corrective run. This tool
 does not provide an automatic server-side rollback.
 
-## Testing and quality checks
-
-```bash
-python3 -m pytest
-python3 -m ruff check .
-```
-
-Tests use dummy data and mocked HTTP calls; they must never connect to a borealisdata.ca. GitHub Actions runs tests, linting, CodeQL, dependency update
-checks, and secret scanning.
-
 ## Security
 
 Do not open a public issue containing a token, credential, private dataset
@@ -243,10 +237,7 @@ and create a replacement; deleting the latest copy does not remove it from Git
 history or third-party caches.
 
 Before publishing changes, confirm that `git status` does not list
-`config.ini`, generated CSV files, dataset JSON exports, or `.DS_Store`. Keep
-Gitleaks and CodeQL enabled: they detect accidentally committed credentials and
-security-sensitive code patterns; they do not replace `config.ini` and do not
-need access to its ignored local contents.
+`config.ini`, generated CSV files, dataset JSON exports, or `.DS_Store`.
 
 For the GitHub account itself, enable two-factor authentication, review and
 delete unused personal access tokens and SSH keys, and keep the commit email set
@@ -254,16 +245,11 @@ to GitHub's private `users.noreply.github.com` address.
 
 ## Repository support files
 
-- `.github/` contains GitHub-only automation: tests, linting, CodeQL, Gitleaks,
-  and monthly dependency updates. It is hidden in normal macOS Finder views
-  because its name begins with a dot, but GitHub reads it automatically. It is
-  not required to run the scripts locally; it is retained to test and protect
-  changes before they reach `main`.
-- `pyproject.toml` identifies the project as an installable Python package,
-  defines its command-line entry points, Python version, dependencies, and
-  shared pytest/Ruff settings. It avoids scattering this configuration across
-  several extra files.
-- `requirements.txt` is the one-file installation list for local use and CI.
+- `dataset_access_tools/` contains the scripts and their shared helper modules.
+- `requirements.txt` lists the libraries needed to run the scripts.
+- `config.sample.ini` provides a configuration template to copy to `config.ini`.
+- `examples/` contains sample CSV and JSON files.
+- `.gitignore` excludes local configuration, generated data, and environment files.
 
 ## License
 
