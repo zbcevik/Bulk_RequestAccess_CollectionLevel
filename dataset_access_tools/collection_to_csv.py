@@ -7,24 +7,32 @@ import json
 from pathlib import Path
 
 try:
-    from pyDataverse.api import NativeApi, SearchApi
-except ImportError as exc:
-    raise SystemExit(
-        "pyDataverse is required. Install it with `python3 -m pip install pyDataverse`."
-    ) from exc
+    from .dataverse_json import DatasetValidationError, dataset_to_rows
+    from .security_utils import (
+        get_api_token,
+        get_config_value,
+        load_config,
+        validate_server_url,
+    )
+except ImportError:  # Support direct execution
+    from dataverse_json import DatasetValidationError, dataset_to_rows
+    from security_utils import get_api_token, get_config_value, load_config, validate_server_url
+
+try:
+    from pyDataverse.api import NativeApi
+except ImportError:
+    NativeApi = None
 
 
 def normalize_server_url(server_url):
-    server_url = server_url.strip()
-    if server_url.endswith("/"):
-        server_url = server_url[:-1]
-    return server_url
+    return validate_server_url(server_url)
 
 
 def create_dataverse_apis(server_url, api_key=None):
-    search_api = SearchApi(server_url, api_token=api_key)
+    if NativeApi is None:
+        raise SystemExit("pyDataverse is required. Install dependencies with `python3 -m pip install -r requirements.txt`.")
     native_api = NativeApi(server_url, api_token=api_key)
-    return search_api, native_api
+    return native_api
 
 
 def search_collection_datasets(native_api, collection_alias):
@@ -32,57 +40,27 @@ def search_collection_datasets(native_api, collection_alias):
     url = f"{native_api.base_url_api_native}/dataverses/{collection_alias}/contents"
     response = native_api.get_request(url)
     data = response.json() if hasattr(response, "json") else response
-    print(f"DEBUG: Contents response status: {response.status_code if hasattr(response, 'status_code') else 'N/A'}")
-    print(f"DEBUG: Contents data type: {type(data)}")
     if isinstance(data, dict) and 'data' in data:
         contents = data['data']
     else:
         contents = data
-    print(f"DEBUG: Contents: {contents[:3] if isinstance(contents, list) else contents}")  # Show first 3 items
     # Filter for datasets
     datasets = [item for item in contents if isinstance(item, dict) and item.get('type') == 'dataset']
-    print(f"DEBUG: Found {len(datasets)} datasets")
     return datasets
-
-
-def extract_title(version):
-    citation = version.get("metadataBlocks", {}).get("citation", {})
-    for field in citation.get("fields", []):
-        if field.get("typeName") == "title":
-            return field.get("value")
-    return None
 
 
 def extract_dataset_rows(dataset_data, source_identifier=""):
     if not isinstance(dataset_data, dict):
         return []
-
-    doi = dataset_data.get("persistentId") or source_identifier or ""
-    version = dataset_data.get("latestVersion") or dataset_data.get("datasetVersion") or dataset_data
-    title = extract_title(version) or dataset_data.get("title") or ""
-    file_access_request_dataset = version.get("fileAccessRequest")
-    file_records = dataset_data.get("files") or version.get("files") or []
-
-    rows = []
-    for file_record in file_records:
-        file_item = file_record.get("dataFile", {})
-        restricted = file_record.get("restricted")
-        file_access_request = file_item.get("fileAccessRequest")
-        if file_access_request is None:
-            file_access_request = file_access_request_dataset
-
-        rows.append({
-            "doi": doi,
-            "dataset_title": title,
-            "file_id": file_item.get("id"),
-            "file_name": file_item.get("filename"),
-            "restricted": bool(restricted),
-            "file_access_request": bool(file_access_request),
-            "restricted_new": "",
-            "file_access_request_new": "",
-        })
-
-    return rows
+    if source_identifier and not any(
+        dataset_data.get(key) for key in ("persistentId", "datasetPersistentId", "identifier")
+    ):
+        dataset_data = dict(dataset_data)
+        dataset_data["persistentId"] = source_identifier
+    try:
+        return dataset_to_rows(dataset_data)
+    except DatasetValidationError:
+        return []
 
 
 def save_json(dataset_json, output_dir, identifier):
@@ -117,6 +95,11 @@ def parse_args():
         description="Fetch all datasets in a Dataverse collection and export file-level rows to CSV."
     )
     parser.add_argument(
+        "--config",
+        default="config.ini",
+        help="INI configuration file (default: config.ini).",
+    )
+    parser.add_argument(
         "--server-url",
         help="Base server URL for the Dataverse/Borealis instance.",
     )
@@ -126,11 +109,11 @@ def parse_args():
     )
     parser.add_argument(
         "--api-key",
-        help="API key for authentication.",
+        help="API token (discouraged: prefer config.ini or the hidden prompt).",
     )
     parser.add_argument(
         "--output",
-        default="dataset_files.csv",
+        default=None,
         help="CSV output file path.",
     )
     parser.add_argument(
@@ -140,19 +123,30 @@ def parse_args():
     )
     parser.add_argument(
         "--json-dir",
-        default="dataset_jsons",
+        default=None,
         help="Directory to save retrieved dataset JSON files when --save-json is used.",
     )
     return parser.parse_args()
 
 
 def prompt_for_missing_args(args):
+    config = load_config(args.config)
+    args.server_url = args.server_url or get_config_value(config, "dataverse", "server_url")
+    args.collection_alias = args.collection_alias or get_config_value(
+        config, "dataverse", "collection_alias"
+    )
+    args.output = args.output or get_config_value(
+        config, "files", "output_csv", "dataset_files.csv"
+    )
+    args.json_dir = args.json_dir or get_config_value(config, "files", "json_dir", "dataset_jsons")
     if not args.server_url:
         args.server_url = input("Server URL: ").strip()
     if not args.collection_alias:
         args.collection_alias = input("Collection alias: ").strip()
-    if not args.api_key:
-        args.api_key = input("API key: ").strip()
+    args.api_key = get_api_token(
+        args.api_key,
+        get_config_value(config, "dataverse", "api_token"),
+    )
     return args
 
 
@@ -160,8 +154,8 @@ def main():
     args = parse_args()
     args = prompt_for_missing_args(args)
 
-    server_url = normalize_server_url(args.server_url)
-    search_api, native_api = create_dataverse_apis(server_url, args.api_key)
+    server_url = validate_server_url(normalize_server_url(args.server_url), args.api_key)
+    native_api = create_dataverse_apis(server_url, args.api_key)
 
     print(f"Searching collection datasets for alias {args.collection_alias}...")
     docs = search_collection_datasets(native_api, args.collection_alias)

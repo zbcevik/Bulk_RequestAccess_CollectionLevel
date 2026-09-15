@@ -1,0 +1,3 @@
+doi,dataset_title,file_id,file_name,restricted,file_access_request,restricted_new,file_access_request_new
+doi:10.0000/EXAMPLE,Example Dataset,1001,sample-data.csv,false,false,true,true
+doi:10.0000/EXAMPLE,Example Dataset,1002,sample-documentation.txt,true,false,,true

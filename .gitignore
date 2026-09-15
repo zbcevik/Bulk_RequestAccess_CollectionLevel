@@ -1,7 +1,26 @@
+# Generated Python files and logs
 __pycache__/
 *.py[cod]
 *.log
+
+# Local environment, editor settings, and macOS metadata
 .venv/
-.env
-*.csv
-!dataset_files.csv
+.vscode/
+.DS_Store
+
+# Python packaging output
+*.egg-info/
+build/
+dist/
+
+# Local configuration file that may contain credentials
+config.ini
+
+# Generated workflow output
+dataset_files.csv
+dataset_jsons/*
+!dataset_jsons/.gitkeep
+
+# Local demo exports (may contain real Dataverse metadata)
+demo_restricted_files.csv
+demo_restricted_jsons/
